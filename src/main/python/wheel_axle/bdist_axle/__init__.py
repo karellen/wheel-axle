@@ -40,6 +40,7 @@ from wheel_axle.runtime._symlinks import write_symlinks_file
 from wheel_axle.runtime.constants import AXLE_LOCK_FILE, SYMLINKS_FILE
 
 __version__ = "${dist_version}"
+WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0"
 
 
 class SymlinkAwareCommmand(Command):
@@ -296,10 +297,10 @@ def suppress_known_deprecation():
 class BdistAxle(_bdist_wheel):
     user_options = list(_bdist_wheel.user_options)
     user_options += [("root-is-pure=", None,
-                      "set to manually override whether the wheel is pure"
+                      "set to manually override whether the wheel is pure "
                       "(default: None)"),
                      ("abi-tag=", None,
-                      "set to override ABI tag"
+                      "set to override ABI tag "
                       "(default: None)"),
                      ]
 
@@ -315,7 +316,7 @@ class BdistAxle(_bdist_wheel):
         self.python_tag = None
         self.python_tag_supplied = False
         self.distribution.extra_path = self.wheel_dist_name, self.AXLE_PTH_CONTENTS
-        self.distribution.install_requires.append("wheel-axle-runtime")
+        self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY)
 
     def finalize_options(self):
         root_is_pure_supplied = self.root_is_pure is not None
