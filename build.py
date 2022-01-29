@@ -49,7 +49,7 @@ default_task = ["analyze", "publish"]
 @init
 def set_properties(project):
     project.depends_on("wheel", ">=0.37.0")
-    project.depends_on("wheel-axle-runtime")
+    project.depends_on("wheel-axle-runtime", "<1.0")
 
     project.set_property("coverage_break_build", False)
     project.set_property("cram_fail_if_no_tests", False)

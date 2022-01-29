@@ -22,6 +22,7 @@ import shutil
 import sys
 import unittest
 from os.path import dirname, join as jp, exists
+from subprocess import check_call
 from tempfile import TemporaryDirectory
 
 from wheel.bdist_wheel import get_abi_tag, get_platform, tags
@@ -34,9 +35,15 @@ class BuildAxleTest(unittest.TestCase):
         self.src_dir = jp(self.target_dir.name, "src")
         self.build_dir = jp(self.target_dir.name, "build")
         self.dist_dir = jp(self.target_dir.name, "dist")
+        self.wheels = set()
 
     def tearDown(self) -> None:
         self.target_dir.cleanup()
+        for wheel_file in list(self.wheels):
+            try:
+                self.uninstall(wheel_file)
+            except Exception:
+                sys.excepthook(*sys.exc_info())
 
     def build_axle(self, dir_name, *extra_args):
         src_dir = jp(self.test_dir, dir_name)
@@ -57,6 +64,16 @@ class BuildAxleTest(unittest.TestCase):
             os.chdir(old_cwd)
             sys.argv.clear()
             sys.argv.extend(old_sys_argv)
+
+    def install(self, wheel_file, user=False, deps=[]):
+        check_call([sys.executable, "-m", "pip", "install", "--pre"] +
+                   (["--user", "--force-reinstall"] if user else []) +
+                   [wheel_file] + deps)
+        self.wheels.add(wheel_file)
+
+    def uninstall(self, wheel_file):
+        check_call([sys.executable, "-m", "pip", "uninstall", "--yes", wheel_file])
+        self.wheels.remove(wheel_file)
 
     def test_axle_1(self):
         self.build_axle("test_axle_1")
@@ -80,7 +97,10 @@ class BuildAxleTest(unittest.TestCase):
     def test_axle_1_python_tag(self):
         self.build_axle("test_axle_1", "--python-tag", "py3")
 
-        self.assertTrue(exists(jp(self.dist_dir, "test_axle_1-0.0.1-py3-none-any.whl")))
+        wheel_file = jp(self.dist_dir, "test_axle_1-0.0.1-py3-none-any.whl")
+        self.assertTrue(exists(wheel_file))
+
+        self.install(wheel_file)
 
     def test_axle_1_root_is_not_pure(self):
         self.build_axle("test_axle_1", "--root-is-pure", "false")
