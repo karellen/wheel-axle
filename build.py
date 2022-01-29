@@ -28,16 +28,16 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "wheel_axle"
-version = "0.0.1"
+version = "0.0.2"
 
 summary = "Axle is Python wheel enhancement library"
 authors = [Author("Karellen, Inc.", "supervisor@karellen.co")]
 maintainers = [Author("Arcadiy Ivanov", "arcadiy@karellen.co")]
 url = "https://github.com/karellen/axle"
 urls = {
-    "Bug Tracker": "https://github.com/karellen/axle/issues",
-    "Source Code": "https://github.com/karellen/axle/",
-    "Documentation": "https://github.com/karellen/axle/"
+    "Bug Tracker": "https://github.com/karellen/wheel-axle/issues",
+    "Source Code": "https://github.com/karellen/wheel-axle/",
+    "Documentation": "https://github.com/karellen/wheel-axle/"
 }
 license = "Apache License, Version 2.0"
 
