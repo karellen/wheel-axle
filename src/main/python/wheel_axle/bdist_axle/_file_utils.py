@@ -31,14 +31,11 @@ def copy_link(src, dst, update=0, verbose=1, dry_run=0, reproduce_link=False):
     link_dest_isdir = os.path.isdir(os.path.join(os.path.dirname(src), link_dest))
 
     if verbose >= 1:
-        if os.path.basename(dst) == os.path.basename(src):
-            log.info("registering link %s (%s) -> %s",
-                     "reproducing" if reproduce_link else "registering",
-                     src, link_dest, dir)
-        else:
-            log.info("registering link %s (%s) -> %s",
-                     "reproducing" if reproduce_link else "registering",
-                     src, link_dest, dst)
+        log.info("%s link %s (%s) -> %s",
+                 "reproducing" if reproduce_link else "registering",
+                 src,
+                 link_dest,
+                 dir if os.path.basename(dst) == os.path.basename(src) else dst)
 
     if reproduce_link:
         os.symlink(link_dest, dst, link_dest_isdir)
