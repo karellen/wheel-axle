@@ -1,7 +1,7 @@
 # Wheel Axle - Python Wheel enhancement library
 
 [![Gitter](https://img.shields.io/gitter/room/karellen/Lobby?logo=gitter)](https://gitter.im/karellen/Lobby)
-[![Build Status](https://img.shields.io/github/workflow/status/karellen/wheel-axle/wheel-axle/master)](https://github.com/karellen/wheel-axle/actions/workflows/build.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/karellen/wheel-axle/build.yml?branch=master)](https://github.com/karellen/wheel-axle/actions/workflows/build.yml)
 [![Coverage Status](https://img.shields.io/coveralls/github/karellen/wheel-axle/master?logo=coveralls)](https://coveralls.io/r/karellen/wheel-axle?branch=master)
 
 [![PyBuilder Version](https://img.shields.io/pypi/v/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
