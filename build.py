@@ -15,8 +15,10 @@
 # limitations under the License.
 #
 
-from pybuilder.core import (use_plugin, init, Author)
+from os import environ
+from pybuilder.core import (use_plugin, init, Author, task, depends, dependents)
 
+use_plugin("python.install_dependencies")
 use_plugin("python.core")
 use_plugin("python.integrationtest")
 use_plugin("python.flake8")
@@ -45,6 +47,18 @@ requires_python = ">=3.7"
 
 default_task = ["analyze", "publish"]
 
+
+@init(environments="ci")
+def init_ci_dependencies(project):
+    project.build_depends_on("setuptools", environ["SETUPTOOLS_VER"])
+    project.build_depends_on("pip", environ["PIP_VER"])
+    default_task.append("install_ci_dependencies")
+
+@task
+@depends("install_dependencies")
+@dependents("compile_sources")
+def install_ci_dependencies(project):
+    pass
 
 @init
 def set_properties(project):
