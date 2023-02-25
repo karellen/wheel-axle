@@ -69,6 +69,7 @@ class BuildAxleTest(unittest.TestCase):
         check_call([sys.executable, "-m", "pip", "install", "--pre"] +
                    (["--user", "--force-reinstall"] if user else []) +
                    [wheel_file] + deps)
+        check_call([sys.executable, "-c", "import site"])
         self.wheels.add(wheel_file)
 
     def uninstall(self, wheel_file):

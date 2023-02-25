@@ -54,11 +54,13 @@ def init_ci_dependencies(project):
     project.build_depends_on("pip", environ["PIP_VER"])
     default_task.append("install_ci_dependencies")
 
+
 @task
 @depends("install_dependencies")
 @dependents("compile_sources")
 def install_ci_dependencies(project):
     pass
+
 
 @init
 def set_properties(project):
@@ -93,6 +95,7 @@ def set_properties(project):
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX",
         "Operating System :: POSIX :: Linux",
