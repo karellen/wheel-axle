@@ -97,6 +97,38 @@ jobs:
           with-venv: false
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
+  build-experimental:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        python-version:
+          - '3.12-dev'
+        pip-version:
+          - '23.0'
+          - '22.0'
+        setuptools-version:
+          - '67.0'
+          - '66.0'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - shell: bash
+        run: |
+          echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
+          echo "SETUPTOOLS_VER=~=${{matrix.setuptools-version}}" >> $GITHUB_ENV
+          echo "PIP_VER=~=${{matrix.pip-version}}" >> $GITHUB_ENV
+      - uses: pybuilder/build@master
+        with:
+          checkout: false
+          with-venv: false
+          python-version: ${{ matrix.python-version }}
+          pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
   build-summary:
     if: success() || failure()
     runs-on: ubuntu-latest
@@ -104,6 +136,7 @@ jobs:
     needs:
       - build-primary
       - build-secondary
+      - build-experimental
     steps:
       - name: Check build matrix status
         if: |
