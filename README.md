@@ -4,11 +4,12 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/karellen/wheel-axle/build.yml?branch=master)](https://github.com/karellen/wheel-axle/actions/workflows/build.yml)
 [![Coverage Status](https://img.shields.io/coveralls/github/karellen/wheel-axle/master?logo=coveralls)](https://coveralls.io/r/karellen/wheel-axle?branch=master)
 
-[![PyBuilder Version](https://img.shields.io/pypi/v/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
-[![PyBuilder Python Versions](https://img.shields.io/pypi/pyversions/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
-[![PyBuilder Downloads Per Day](https://img.shields.io/pypi/dd/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
-[![PyBuilder Downloads Per Week](https://img.shields.io/pypi/dw/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
-[![PyBuilder Downloads Per Month](https://img.shields.io/pypi/dm/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
+[![Wheel Axle Version](https://img.shields.io/pypi/v/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
+[![Wheel Axle Python Versions](https://img.shields.io/pypi/pyversions/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
+
+[![Wheel Axle Downloads Per Day](https://img.shields.io/pypi/dd/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle/)
+[![Wheel Axle Downloads Per Week](https://img.shields.io/pypi/dw/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle/)
+[![Wheel Axle Downloads Per Month](https://img.shields.io/pypi/dm/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle/)
 
 ## Problem
 
