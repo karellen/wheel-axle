@@ -7,9 +7,9 @@
 [![Wheel Axle Version](https://img.shields.io/pypi/v/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
 [![Wheel Axle Python Versions](https://img.shields.io/pypi/pyversions/wheel-axle?logo=pypi)](https://pypi.org/project/wheel-axle/)
 
-[![Wheel Axle Downloads Per Day](https://img.shields.io/pypi/dd/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle/)
-[![Wheel Axle Downloads Per Week](https://img.shields.io/pypi/dw/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle/)
-[![Wheel Axle Downloads Per Month](https://img.shields.io/pypi/dm/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle/)
+[![Wheel Axle Downloads Per Day](https://img.shields.io/pypi/dd/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle)
+[![Wheel Axle Downloads Per Week](https://img.shields.io/pypi/dw/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle)
+[![Wheel Axle Downloads Per Month](https://img.shields.io/pypi/dm/wheel-axle?logo=pypi)](https://pypistats.org/packages/wheel-axle)
 
 ## Problem
 
