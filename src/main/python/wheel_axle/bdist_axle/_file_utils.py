@@ -38,7 +38,11 @@ def copy_link(src, dst, update=0, verbose=1, dry_run=0, reproduce_link=False):
                  dir if os.path.basename(dst) == os.path.basename(src) else dst)
 
     if reproduce_link:
-        os.symlink(link_dest, dst, link_dest_isdir)
+        try:
+            os.symlink(link_dest, dst, link_dest_isdir)
+        except FileExistsError:
+            os.unlink(dst)
+            os.symlink(link_dest, dst, link_dest_isdir)
 
     return dst, link_dest, link_dest_isdir
 
