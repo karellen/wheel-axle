@@ -57,7 +57,7 @@ class SymlinkAwareCommmand(Command):
         if os.path.islink(infile):
             out = copy_link(infile, outfile, not self.force, dry_run=self.dry_run)
             self._symlinks.append(out)
-            return out[0], 0
+            return out[0], out[3]
 
         return super().copy_file(infile, outfile, preserve_mode=preserve_mode, preserve_times=preserve_times,
                                  link=link,
@@ -167,7 +167,7 @@ class BuildPy(build_py):
 
         if os.path.islink(infile):
             out = copy_link(infile, outfile, not self.force, dry_run=self.dry_run, reproduce_link=True)
-            return out[0], 1
+            return out[0], out[3]
 
         return super().copy_file(infile, outfile, preserve_mode=preserve_mode, preserve_times=preserve_times,
                                  link=link,

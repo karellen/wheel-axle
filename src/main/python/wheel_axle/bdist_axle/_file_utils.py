@@ -16,7 +16,7 @@
 #
 
 import os
-from distutils import dir_util, log
+from distutils import dep_util, dir_util, log
 from distutils.errors import DistutilsFileError
 
 
@@ -30,6 +30,15 @@ def copy_link(src, dst, update=0, verbose=1, dry_run=0, reproduce_link=False):
     link_dest = os.readlink(src)
     link_dest_isdir = os.path.isdir(os.path.join(os.path.dirname(src), link_dest))
 
+    if update and not dep_util.newer(src, dst):
+        if verbose >= 1:
+            log.debug("not %s %s (%s) (output up-to-date)",
+                      "reproducing" if reproduce_link else "registering",
+                      src,
+                      link_dest,
+                      )
+        return (dst, link_dest, link_dest_isdir, 0)
+
     if verbose >= 1:
         log.info("%s link %s (%s) -> %s",
                  "reproducing" if reproduce_link else "registering",
@@ -37,14 +46,14 @@ def copy_link(src, dst, update=0, verbose=1, dry_run=0, reproduce_link=False):
                  link_dest,
                  dir if os.path.basename(dst) == os.path.basename(src) else dst)
 
-    if reproduce_link:
+    if reproduce_link and not dry_run:
         try:
             os.symlink(link_dest, dst, link_dest_isdir)
         except FileExistsError:
             os.unlink(dst)
             os.symlink(link_dest, dst, link_dest_isdir)
 
-    return dst, link_dest, link_dest_isdir
+    return (dst, link_dest, link_dest_isdir, reproduce_link)
 
 
 def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
