@@ -29,16 +29,28 @@ from wheel.bdist_wheel import get_abi_tag, get_platform, tags
 
 
 class BuildAxleTest(unittest.TestCase):
+    def is_success(self):
+        if hasattr(self._outcome, 'errors'):
+            # Python 3.4 - 3.10  (These two methods have no side effects)
+            result = self.defaultTestResult()
+            self._feedErrorsToResult(result, self._outcome.errors)
+        else:
+            # Python 3.11+
+            result = self._outcome.result
+        return all(test != self for test, text in result.errors + result.failures)
+
     def setUp(self) -> None:
         self.test_dir = jp(dirname(dirname(__file__)), "resources")
-        self.target_dir = TemporaryDirectory()
+        self.target_dir = TemporaryDirectory(prefix="build_axle_tests")
+        self.target_dir._finalizer.detach()  # to make cleanup conditional
         self.src_dir = jp(self.target_dir.name, "src")
         self.build_dir = jp(self.target_dir.name, "build")
         self.dist_dir = jp(self.target_dir.name, "dist")
         self.wheels = set()
 
     def tearDown(self) -> None:
-        self.target_dir.cleanup()
+        if self.is_success():
+            self.target_dir.cleanup()
         for wheel_file in list(self.wheels):
             try:
                 self.uninstall(wheel_file)
@@ -90,6 +102,22 @@ class BuildAxleTest(unittest.TestCase):
             "test_axle_1-0.0.1.data/scripts/script2": ("script1", '0'),
             "test_axle_1-0.0.1.data/headers/header2.h": ("header1.h", '0'),
             "test_axle_1-0.0.1.data/data/lib/foo.so": ("foo.1.so", '0'),
+        })
+
+    def test_issue_12(self):
+        self.build_axle("test_issue_12")
+
+        self.assertTrue(exists(jp(self.dist_dir, "test_issue_12-0.0.1-py3-none-any.whl")))
+
+        with open(jp(self.build_dir, "test_issue_12-0.0.1.dist-info", "symlinks.txt")) as f:
+            reader = csv.reader(f)
+            symlinks = {l[0]: (l[1], l[2]) for l in reader}
+
+        self.assertDictEqual(symlinks, {
+            "mypackage/lib/foo.so": ("foo.so.0", '0'),
+            "mypackage/lib/foo.so.0": ("foo.so.0.1", '0'),
+            "mypackage/lib/prefix/foo.so": ("foo.so.0", '0'),
+            "mypackage/lib/prefix/foo.so.0": ("foo.so.0.1", '0'),
         })
 
     def get_platform(self):
