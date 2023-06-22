@@ -148,16 +148,23 @@ class BuildPy(build_py):
         if os.path.isfile(target):
             os.chmod(target, os.stat(target).st_mode | stat.S_IWRITE)
 
-    def build_package_data(self):
-        """Copy data files into build directory"""
+    def _get_package_data_output_mapping(self):
+        yielded = set()
         for package, src_dir, build_dir, filenames in self.data_files:
             for filename in filenames:
                 target = os.path.join(build_dir, filename)
-                self.mkpath(os.path.dirname(target))
                 srcfile = os.path.join(src_dir, filename)
-                outf, copied = self.copy_file(srcfile, target)
-                self.make_writable(target)
-                srcfile = os.path.abspath(srcfile)
+                key = target, srcfile
+                if key not in yielded:
+                    yielded.add(key)
+                    yield key
+
+    def build_package_data(self):
+        """Copy data files into build directory"""
+        for target, srcfile in self._get_package_data_output_mapping():
+            self.mkpath(os.path.dirname(target))
+            _outf, _copied = self.copy_file(srcfile, target)
+            self.make_writable(target)
 
     def copy_file(self, infile, outfile, preserve_mode=1, preserve_times=1,
                   link=None, level=1):

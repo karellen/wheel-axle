@@ -21,20 +21,20 @@ jobs:
           - '3.10'
           - '3.9'
         pip-version:
+          - '23.1'
           - '23.0'
           - '22.3'
           - '22.2'
-          - '22.1'
-          - '22.0'
         setuptools-version:
+          - '68.0'
           - '67.0'
           - '66.0'
           - '65.0'
     env:
       DEPLOY_PYTHONS: "3.11"
       DEPLOY_OSES: "Linux"
-      DEPLOY_PIPS: "23.0"
-      DEPLOY_SETUPTOOLS: "67.0"
+      DEPLOY_PIPS: "23.1"
+      DEPLOY_SETUPTOOLS: "68.0"
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,9 +73,11 @@ jobs:
           - '3.8'
           - '3.7'
         pip-version:
+          - '23.1'
           - '23.0'
           - '22.0'
         setuptools-version:
+          - '68.0'
           - '67.0'
           - '66.0'
           - '65.0'
@@ -109,9 +111,11 @@ jobs:
         python-version:
           - '3.12-dev'
         pip-version:
+          - '23.1'
           - '23.0'
           - '22.0'
         setuptools-version:
+          - '68.0'
           - '67.0'
           - '66.0'
     env:
