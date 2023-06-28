@@ -69,6 +69,7 @@ is drop-in.
 Additional functionality is available via the following options:
 
 ```commandline
+  --python-tag      Python implementation compatibility tag (default: 'py3')
   --root-is-pure    set to manually override whether the wheel is
                     pure (default: None)
   --abi-tag         set to override ABI tag (default: None)
