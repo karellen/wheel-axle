@@ -17,6 +17,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
         python-version:
+          - '3.12-dev'
           - '3.11'
           - '3.10'
           - '3.9'
@@ -30,6 +31,13 @@ jobs:
           - '67.0'
           - '66.0'
           - '65.0'
+        exclude:
+          - python-version: '3.12-dev'
+            setuptools-version: '65.0'
+          - python-version: '3.12-dev'
+            pip-version: '22.2'
+          - python-version: '3.12-dev'
+            pip-version: '22.3'
     env:
       DEPLOY_PYTHONS: "3.11"
       DEPLOY_OSES: "Linux"
@@ -109,7 +117,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
         python-version:
-          - '3.12-dev'
+          - '3.13-dev'
         pip-version:
           - '23.1'
           - '23.0'
