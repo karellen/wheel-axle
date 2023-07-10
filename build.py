@@ -30,7 +30,7 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "wheel_axle"
-version = "0.0.7.dev"
+version = "0.0.7"
 
 summary = "Axle is Python wheel enhancement library"
 authors = [Author("Karellen, Inc.", "supervisor@karellen.co")]
