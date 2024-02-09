@@ -17,17 +17,16 @@ jobs:
           - ubuntu-latest
           - macos-latest
         python-version:
-          - '3.12-dev'
+          - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
         pip-version:
-          - '23.2'
-          - '23.1'
-          - '23.0'
+          - '24.0'
+          - '23.3'
           - '22.3'
-          - '22.2'
         setuptools-version:
+          - '69.0'
           - '68.2'
           - '68.1'
           - '68.0'
@@ -35,22 +34,22 @@ jobs:
           - '66.0'
           - '65.0'
         exclude:
-          - python-version: '3.12-dev'
+          - python-version: '3.12'
             setuptools-version: '65.0'
-          - python-version: '3.12-dev'
+          - python-version: '3.12'
             pip-version: '22.2'
-          - python-version: '3.12-dev'
+          - python-version: '3.12'
             pip-version: '22.3'
     env:
       DEPLOY_PYTHONS: "3.11"
       DEPLOY_OSES: "Linux"
-      DEPLOY_PIPS: "23.2"
-      DEPLOY_SETUPTOOLS: "68.2"
+      DEPLOY_PIPS: "23.3"
+      DEPLOY_SETUPTOOLS: "69.0"
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - shell: bash
         run: |
           echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
@@ -71,6 +70,7 @@ jobs:
           with-venv: false
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
+
   build-secondary:
     runs-on: ${{ matrix.os }}
     continue-on-error: false
@@ -84,11 +84,11 @@ jobs:
           - '3.8'
           - '3.7'
         pip-version:
-          - '23.2'
-          - '23.1'
-          - '23.0'
-          - '22.0'
+          - '24.0'
+          - '23.3'
+          - '22.3'
         setuptools-version:
+          - '69.0'
           - '68.2'
           - '68.1'
           - '68.0'
@@ -103,10 +103,12 @@ jobs:
             setuptools-version: '68.2'
           - python-version: '3.7'
             setuptools-version: '68.1'
+          - python-version: '3.7'
+            setuptools-version: '69.0'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - shell: bash
         run: |
           echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
@@ -118,6 +120,7 @@ jobs:
           with-venv: false
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
+
   build-experimental:
     runs-on: ${{ matrix.os }}
     continue-on-error: true
@@ -130,11 +133,11 @@ jobs:
         python-version:
           - '3.13-dev'
         pip-version:
-          - '23.2'
-          - '23.1'
-          - '23.0'
-          - '22.0'
+          - '24.0'
+          - '23.3'
+          - '22.3'
         setuptools-version:
+          - '69.0'
           - '68.2'
           - '68.1'
           - '68.0'
@@ -143,7 +146,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - shell: bash
         run: |
           echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
