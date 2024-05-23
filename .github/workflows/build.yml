@@ -15,7 +15,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13
         python-version:
           - '3.12'
           - '3.11'
@@ -26,7 +26,8 @@ jobs:
           - '23.3'
           - '22.3'
         setuptools-version:
-          - '69.0'
+          - '70.0'
+          - '69.5'
           - '68.2'
           - '68.1'
           - '68.0'
@@ -80,7 +81,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13
         python-version:
           - '3.8'
           - '3.7'
@@ -89,7 +90,8 @@ jobs:
           - '23.3'
           - '22.3'
         setuptools-version:
-          - '69.0'
+          - '70.0'
+          - '69.5'
           - '68.2'
           - '68.1'
           - '68.0'
@@ -105,7 +107,9 @@ jobs:
           - python-version: '3.7'
             setuptools-version: '68.1'
           - python-version: '3.7'
-            setuptools-version: '69.0'
+            setuptools-version: '69.5'
+          - python-version: '3.7'
+            setuptools-version: '70.0'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -130,13 +134,13 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13
         python-version:
           - '3.13-dev'
         pip-version:
           - '24.0'
         setuptools-version:
-          - '69.0'
+          - '70.0'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
