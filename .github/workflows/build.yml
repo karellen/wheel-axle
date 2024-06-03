@@ -42,10 +42,10 @@ jobs:
           - python-version: '3.12'
             pip-version: '22.3'
     env:
-      DEPLOY_PYTHONS: "3.11"
+      DEPLOY_PYTHONS: "3.12"
       DEPLOY_OSES: "Linux"
-      DEPLOY_PIPS: "23.3"
-      DEPLOY_SETUPTOOLS: "69.0"
+      DEPLOY_PIPS: "24.0"
+      DEPLOY_SETUPTOOLS: "70.0"
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
