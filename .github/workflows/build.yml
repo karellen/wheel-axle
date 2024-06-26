@@ -114,6 +114,8 @@ jobs:
             setuptools-version: '70.0'
           - python-version: '3.7'
             setuptools-version: '70.1'
+          - python-version: '3.7'
+            pip-version: '24.1'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
