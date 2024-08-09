@@ -32,7 +32,21 @@ from setuptools.command.egg_info import egg_info, manifest_maker, FileList
 from setuptools.command.install import install
 from setuptools.command.install_lib import install_lib
 from setuptools.command.install_scripts import install_scripts
-from wheel.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+
+try:
+    # SetupTools >= 70.1
+    from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel, python
+except ImportError:
+    try:
+        # Wheel >= 0.44.0
+        from wheel._bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+    except ImportError:
+        # Wheel < 0.44.0
+        try:
+            from wheel.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+        except ImportError:
+            raise ImportError("Either `setuptools>=70.1` package or `wheel` package is required")
+
 from wheel.vendored.packaging import tags
 
 from wheel_axle.bdist_axle._file_utils import copy_link, copy_tree
