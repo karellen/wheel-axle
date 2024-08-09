@@ -20,32 +20,31 @@ jobs:
           - '3.12'
           - '3.11'
           - '3.10'
-          - '3.9'
         pip-version:
+          - '24.2'
           - '24.1'
           - '24.0'
           - '23.3'
           - '22.3'
         setuptools-version:
-          - '70.1'
-          - '70.0'
+          - '72.1'
+          - '71.1'
+          - '70.3'
           - '69.5'
           - '68.2'
-          - '67.0'
-          - '66.0'
-          - '65.0'
+          - '67.8'
+          - '66.1'
+          - '65.7'
         exclude:
           - python-version: '3.12'
-            setuptools-version: '65.0'
-          - python-version: '3.12'
-            pip-version: '22.2'
+            setuptools-version: '65.7'
           - python-version: '3.12'
             pip-version: '22.3'
     env:
       DEPLOY_PYTHONS: "3.12"
       DEPLOY_OSES: "Linux"
-      DEPLOY_PIPS: "24.0"
-      DEPLOY_SETUPTOOLS: "70.0"
+      DEPLOY_PIPS: "24.2"
+      DEPLOY_SETUPTOOLS: "72.1"
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,6 +73,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
   build-secondary:
+    needs: 'build-primary'
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     strategy:
@@ -83,39 +83,26 @@ jobs:
           - ubuntu-latest
           - macos-13
         python-version:
+          - '3.9'
           - '3.8'
-          - '3.7'
         pip-version:
+          - '24.2'
           - '24.1'
           - '24.0'
           - '23.3'
           - '22.3'
         setuptools-version:
-          - '70.1'
-          - '70.0'
+          - '72.1'
+          - '71.1'
+          - '70.3'
           - '69.5'
           - '68.2'
-          - '68.1'
-          - '68.0'
-          - '67.0'
-          - '66.0'
-          - '65.0'
+          - '67.8'
+          - '66.1'
+          - '65.7'
           - '64.0'
-          - '63.0'
-          - '62.0'
-        exclude:
-          - python-version: '3.7'
-            setuptools-version: '68.2'
-          - python-version: '3.7'
-            setuptools-version: '68.1'
-          - python-version: '3.7'
-            setuptools-version: '69.5'
-          - python-version: '3.7'
-            setuptools-version: '70.0'
-          - python-version: '3.7'
-            setuptools-version: '70.1'
-          - python-version: '3.7'
-            pip-version: '24.1'
+          - '63.4'
+          - '62.6'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -133,6 +120,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
   build-experimental:
+    needs: 'build-primary'
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
@@ -144,9 +132,9 @@ jobs:
         python-version:
           - '3.13-dev'
         pip-version:
-          - '24.1'
+          - '24.2'
         setuptools-version:
-          - '70.1'
+          - '72.1'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:

@@ -25,7 +25,16 @@ from os.path import dirname, join as jp, exists
 from subprocess import check_call
 from tempfile import TemporaryDirectory
 
-from wheel.bdist_wheel import get_abi_tag, get_platform, tags
+try:
+    # SetupTools >= 70.1
+    from setuptools.command.bdist_wheel import get_abi_tag, get_platform, tags
+except ImportError:
+    try:
+        # Wheel >= 0.44.0
+        from wheel._bdist_wheel import get_abi_tag, get_platform, tags
+    except ImportError:
+        # Wheel < 0.44.0
+        from wheel.bdist_wheel import get_abi_tag, get_platform, tags
 
 
 class BuildAxleTest(unittest.TestCase):
