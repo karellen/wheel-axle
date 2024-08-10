@@ -7,7 +7,44 @@ on:
     branches:
       - master
 jobs:
+  build-smoke-test:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        python-version:
+          - '3.12'
+        pip-version:
+          - '24.2'
+        setuptools-version:
+          - '72.1'
+          - '71.1'
+          - '70.3'
+          - '69.5'
+        wheel-version:
+          - '0.44'
+          - '0.42.0'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        run: |
+          echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
+          echo "SETUPTOOLS_VER=~=${{matrix.setuptools-version}}" >> $GITHUB_ENV
+          echo "PIP_VER=~=${{matrix.pip-version}}" >> $GITHUB_ENV
+          echo "WHEEL_VER=~=${{matrix.wheel-version}}" >>$GITHUB_ENV
+      - uses: pybuilder/build@master
+        with:
+          checkout: false
+          with-venv: false
+          python-version: ${{ matrix.python-version }}
+          pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
   build-primary:
+    needs: build-smoke-test
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     strategy:
@@ -73,7 +110,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
   build-secondary:
-    needs: 'build-primary'
+    needs: build-primary
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     strategy:
@@ -120,7 +157,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
   build-experimental:
-    needs: 'build-primary'
+    needs: build-primary
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
