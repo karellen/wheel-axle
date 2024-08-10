@@ -30,7 +30,7 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "wheel_axle"
-version = "0.0.8"
+version = "0.0.9.dev"
 
 summary = "Axle is Python wheel enhancement library"
 authors = [Author("Karellen, Inc.", "supervisor@karellen.co")]
@@ -52,6 +52,8 @@ default_task = ["analyze", "publish"]
 def init_ci_dependencies(project):
     project.build_depends_on("setuptools", environ["SETUPTOOLS_VER"])
     project.build_depends_on("pip", environ["PIP_VER"])
+    if "WHEEL_VER" in environ:
+        project.build_depends_on("wheel", environ["WHEEL_VER"])
     default_task.append("install_ci_dependencies")
 
 
@@ -64,7 +66,8 @@ def install_ci_dependencies(project):
 
 @init
 def set_properties(project):
-    project.depends_on("wheel", ">=0.37.0")
+    if "WHEEL_VER" not in environ:
+        project.depends_on("wheel", ">=0.37.0")
     project.depends_on("wheel-axle-runtime", "<1.0")
 
     project.set_property("coverage_break_build", False)
