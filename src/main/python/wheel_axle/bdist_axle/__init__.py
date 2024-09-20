@@ -51,11 +51,11 @@ from wheel.vendored.packaging import tags
 
 from wheel_axle.bdist_axle._file_utils import copy_link, copy_tree
 from wheel_axle.runtime._symlinks import write_symlinks_file
-from wheel_axle.runtime.constants import AXLE_LOCK_FILE, SYMLINKS_FILE
+from wheel_axle.runtime.constants import AXLE_LOCK_FILE, SYMLINKS_FILE, REQUIRE_LIBPYTHON_FILE
 
 __version__ = "${dist_version}"
 WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0"
-
+WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY = f"{WHEEL_AXLE_DEPENDENCY},>0.0.5"
 
 class SymlinkAwareCommmand(Command):
     def initialize_options(self):
@@ -323,10 +323,13 @@ class BdistAxle(_bdist_wheel):
                      ("abi-tag=", None,
                       "set to override ABI tag "
                       "(default: None)"),
+                     ("require-libpython=", None,
+                      "set to indicate the package requires libpython in the exec_prefix/platlib",
+                      "(default: False)")
                      ]
 
     boolean_options = list(_bdist_wheel.boolean_options)
-    boolean_options += ["root-is-pure"]
+    boolean_options += ["root-is-pure", "require-libpython"]
 
     AXLE_PTH_CONTENTS = """import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname);"""
 
@@ -336,8 +339,7 @@ class BdistAxle(_bdist_wheel):
         self.abi_tag_supplied = False
         self.python_tag = None
         self.python_tag_supplied = False
-        self.distribution.extra_path = self.wheel_dist_name, self.AXLE_PTH_CONTENTS
-        self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY)
+        self.require_libpython = False
 
     def finalize_options(self):
         root_is_pure_supplied = self.root_is_pure is not None
@@ -352,6 +354,12 @@ class BdistAxle(_bdist_wheel):
 
         if root_is_pure_supplied:
             self.root_is_pure = bool(root_is_pure)
+
+        if self.require_libpython:
+            self.distribution.install_requires.append(WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY)
+        else:
+            self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY)
+        self.distribution.extra_path = self.wheel_dist_name, self.AXLE_PTH_CONTENTS
 
     def get_tag(self):
         tag = super().get_tag()
@@ -403,6 +411,10 @@ class BdistAxle(_bdist_wheel):
 
         with open(os.path.join(distinfo_path, AXLE_LOCK_FILE), "wb"):
             pass
+
+        if self.require_libpython:
+            with open(os.path.join(distinfo_path, REQUIRE_LIBPYTHON_FILE), "wb"):
+                pass
 
     def write_wheelfile(self, wheelfile_base, generator="bdist_axle (" + __version__ + ")"):
         return super().write_wheelfile(wheelfile_base, generator)

@@ -106,11 +106,32 @@ class BuildAxleTest(unittest.TestCase):
             reader = csv.reader(f)
             symlinks = {l[0]: (l[1], l[2]) for l in reader}
 
+        self.assertFalse(exists(jp(self.build_dir, "test_axle_1-0.0.1.dist-info", "require-libpython")))
+
         self.assertDictEqual(symlinks, {
             "bar/foo.so": ("../../../foo.so", '0'),
             "test_axle_1-0.0.1.data/scripts/script2": ("script1", '0'),
             "test_axle_1-0.0.1.data/headers/header2.h": ("header1.h", '0'),
             "test_axle_1-0.0.1.data/data/lib/foo.so": ("foo.1.so", '0'),
+        })
+
+    def test_axle_2_with_libpython_req(self):
+        self.build_axle("test_axle_2_libpython", "--require-libpython", "true")
+
+        self.assertTrue(exists(jp(self.dist_dir, "test_axle_2_libpython-0.0.1-py3-none-any.whl")))
+
+        with open(jp(self.build_dir, "test_axle_2_libpython-0.0.1.dist-info", "symlinks.txt")) as f:
+            reader = csv.reader(f)
+            symlinks = {l[0]: (l[1], l[2]) for l in reader}
+
+        self.assertTrue(exists(jp(self.build_dir, "test_axle_2_libpython-0.0.1.dist-info", "require-libpython")))
+
+        print(symlinks)
+        self.assertDictEqual(symlinks, {
+            "bar/foo.so": ("../../../foo.so", '0'),
+            "test_axle_2_libpython-0.0.1.data/scripts/script2": ("script1", '0'),
+            "test_axle_2_libpython-0.0.1.data/headers/header2.h": ("header1.h", '0'),
+            "test_axle_2_libpython-0.0.1.data/data/lib/foo.so": ("foo.1.so", '0'),
         })
 
     def test_issue_12(self):
