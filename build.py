@@ -30,7 +30,7 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "wheel_axle"
-version = "0.0.9.dev"
+version = "0.0.9"
 
 summary = "Axle is Python wheel enhancement library"
 authors = [Author("Karellen, Inc.", "supervisor@karellen.co")]
@@ -68,7 +68,7 @@ def install_ci_dependencies(project):
 def set_properties(project):
     if "WHEEL_VER" not in environ:
         project.depends_on("wheel", ">=0.37.0")
-    project.depends_on("wheel-axle-runtime", "<1.0")
+    project.depends_on("wheel-axle-runtime", "<1.0,>0.0.5")
 
     project.set_property("coverage_break_build", False)
     project.set_property("cram_fail_if_no_tests", False)
@@ -100,6 +100,7 @@ def set_properties(project):
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX",
         "Operating System :: POSIX :: Linux",

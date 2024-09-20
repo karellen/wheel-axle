@@ -71,10 +71,12 @@ is drop-in.
 Additional functionality is available via the following options:
 
 ```commandline
-  --python-tag      Python implementation compatibility tag (default: 'py3')
-  --root-is-pure    set to manually override whether the wheel is
-                    pure (default: None)
-  --abi-tag         set to override ABI tag (default: None)
+  --python-tag        Python implementation compatibility tag (default: 'py3')
+  --root-is-pure      set to manually override whether the wheel is
+                      pure (default: None)
+  --abi-tag           set to override ABI tag (default: None)
+  --require-libpython set to indicate the package requires libpython in the
+                       exec_prefix/platlib
 ```
 
 Using `--python-tag`, `--root-is-pure` and `--abi-tag` allows you to create wheels that carry platform-dependent data

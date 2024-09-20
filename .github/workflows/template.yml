@@ -1,0 +1,87 @@
+name: wheel-axle-template
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      python-version:
+        required: true
+        type: string
+      deploy:
+        required: false
+        type: boolean
+        default: false
+      deploy-pip:
+        required: false
+        type: string
+        default: none
+      deploy-setuptools:
+        required: false
+        type: string
+      exclude:
+        required: false
+        type: string
+    secrets:
+      PYPI_TOKEN:
+        required: false
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ${{ inputs.os }}
+        python-version:
+          - ${{ inputs.python-version }}
+        pip-version:
+          - '24.2'
+          - '24.1'
+          - '24.0'
+          - '23.3'
+          - '22.3'
+        setuptools-version:
+          - '75.1'
+          - '74.1'
+          - '73.0'
+          - '72.2'
+          - '71.1'
+          - '70.3'
+          - '69.5'
+          - '68.2'
+          - '67.8'
+          - '66.1'
+          - '65.7'
+          - '64.0'
+          - '63.4'
+          - '62.6'
+        exclude: ${{ fromJSON(inputs.exclude) }}
+    env:
+      DEPLOY_PIP: ${{ inputs.deploy-pip }}
+      DEPLOY_SETUPTOOLS: ${{ inputs.deploy-setuptools }}
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        run: |
+          echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
+          echo "SETUPTOOLS_VER=~=${{matrix.setuptools-version}}" >> $GITHUB_ENV
+          echo "PIP_VER=~=${{matrix.pip-version}}" >> $GITHUB_ENV
+      - shell: bash
+        if: |
+          inputs.deploy &&
+          contains(env.DEPLOY_PIP, matrix.pip-version) &&
+          contains(env.DEPLOY_SETUPTOOLS, matrix.setuptools-version)
+        run: |
+          echo "PYB_EXTRA_ARGS=+upload --no-venvs" >> $GITHUB_ENV
+      - uses: pybuilder/build@master
+        with:
+          checkout: false
+          with-venv: false
+          python-version: ${{ matrix.python-version }}
+          pyb-extra-args: ${{ env.PYB_EXTRA_ARGS }}
