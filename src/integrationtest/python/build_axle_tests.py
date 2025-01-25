@@ -86,6 +86,8 @@ class BuildAxleTest(unittest.TestCase):
             sys.argv.clear()
             sys.argv.extend(old_sys_argv)
 
+        check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
+
     def install(self, wheel_file, user=False, deps=[]):
         check_call([sys.executable, "-m", "pip", "install", "--pre"] +
                    (["--user", "--force-reinstall"] if user else []) +

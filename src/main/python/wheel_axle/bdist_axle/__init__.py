@@ -35,8 +35,8 @@ from setuptools.command.install_scripts import install_scripts
 
 try:
     # SetupTools >= 70.1
-    from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel, python
-except ImportError:
+    from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+except ImportError as e:
     try:
         # Wheel >= 0.44.0
         from wheel._bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
