@@ -30,7 +30,7 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "wheel_axle"
-version = "0.0.9"
+version = "0.0.10.dev"
 
 summary = "Axle is Python wheel enhancement library"
 authors = [Author("Karellen, Inc.", "supervisor@karellen.co")]
@@ -69,6 +69,7 @@ def set_properties(project):
     if "WHEEL_VER" not in environ:
         project.depends_on("wheel", ">=0.37.0")
     project.depends_on("wheel-axle-runtime", "<1.0,>0.0.5")
+    project.build_depends_on("twine")
 
     project.set_property("coverage_break_build", False)
     project.set_property("cram_fail_if_no_tests", False)
