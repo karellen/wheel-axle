@@ -16,12 +16,12 @@ jobs:
         os:
           - ubuntu-latest
         python-version:
-          - '3.12'
+          - '3.13'
         pip-version:
-          - '24.2'
+          - '25.0'
         setuptools-version:
-          - '75.8'
-          - '75.7'
+          - '76.0'
+          - '75.9'
           - '74.1'
           - '73.0'
           - '72.1'
@@ -64,14 +64,30 @@ jobs:
             echo -e '\nEOF'
           }  >> "$GITHUB_OUTPUT"
 
+  build-ubuntu-py313:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.13'
+      deploy: ${{ github.event_name == 'push' }}
+      deploy-pip: '25.0'
+      deploy-setuptools: '76.0'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ read-exclusions ]
+  build-macos-py313:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: macos-13
+      python-version: '3.13'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ build-ubuntu-py313, read-exclusions ]
   build-ubuntu-py312:
     uses: ./.github/workflows/template.yml
     with:
       os: ubuntu-latest
       python-version: '3.12'
-      deploy: ${{ github.event_name == 'push' }}
-      deploy-pip: '24.2'
-      deploy-setuptools: '75.8'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]
@@ -147,19 +163,19 @@ jobs:
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ build-ubuntu-py38, read-exclusions ]
-  build-ubuntu-py313:
+  build-ubuntu-py314:
     uses: ./.github/workflows/template.yml
     with:
       os: ubuntu-latest
-      python-version: '3.13'
+      python-version: '3.14-dev'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]
-  build-macos-py313:
+  build-macos-py314:
     uses: ./.github/workflows/template.yml
     with:
       os: macos-13
-      python-version: '3.13'
+      python-version: '3.14-dev'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ build-ubuntu-py313, read-exclusions ]
@@ -168,6 +184,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Summary
     needs:
+      - build-ubuntu-py314
+      - build-macos-py314
       - build-ubuntu-py313
       - build-macos-py313
       - build-ubuntu-py312

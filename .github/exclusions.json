@@ -1,11 +1,11 @@
 [
   {
     "python-version": "3.8",
-    "setuptools-version": "75.7"
+    "setuptools-version": "76.0"
   },
   {
     "python-version": "3.8",
-    "setuptools-version": "75.8"
+    "setuptools-version": "75.9"
   },
   {
     "python-version": "3.12",
@@ -48,7 +48,31 @@
     "setuptools-version": "62.6"
   },
   {
+    "python-version": "3.14-dev",
+    "setuptools-version": "65.7"
+  },
+  {
+    "python-version": "3.14-dev",
+    "setuptools-version": "65.7"
+  },
+  {
+    "python-version": "3.14-dev",
+    "setuptools-version": "64.0"
+  },
+  {
+    "python-version": "3.14-dev",
+    "setuptools-version": "63.4"
+  },
+  {
+    "python-version": "3.14-dev",
+    "setuptools-version": "62.6"
+  },
+  {
     "python-version": "3.13",
+    "pip-version": "22.3"
+  },
+  {
+    "python-version": "3.14-dev",
     "pip-version": "22.3"
   }
 ]
