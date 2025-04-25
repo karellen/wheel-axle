@@ -20,7 +20,10 @@ jobs:
         pip-version:
           - '25.0'
         setuptools-version:
-          - '76.0'
+          - '79.0'
+          - '78.1'
+          - '77.0'
+          - '76.1'
           - '75.9'
           - '74.1'
           - '73.0'
@@ -71,7 +74,7 @@ jobs:
       python-version: '3.13'
       deploy: ${{ github.event_name == 'push' }}
       deploy-pip: '25.0'
-      deploy-setuptools: '76.0'
+      deploy-setuptools: '79.0'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]
@@ -178,7 +181,7 @@ jobs:
       python-version: '3.14-dev'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
-    needs: [ build-ubuntu-py313, read-exclusions ]
+    needs: [ build-ubuntu-py314, read-exclusions ]
   build-summary:
     if: success() || failure()
     runs-on: ubuntu-latest
