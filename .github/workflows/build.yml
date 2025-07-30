@@ -238,8 +238,6 @@ jobs:
       - build-macos-py310
       - build-ubuntu-py39
       - build-macos-py39
-      - build-ubuntu-py38
-      - build-macos-py38
     steps:
       - name: Check build matrix status
         if: |
@@ -252,7 +250,5 @@ jobs:
           needs.build-ubuntu-py310.result != 'success' ||
           needs.build-macos-py310.result != 'success' ||
           needs.build-ubuntu-py39.result != 'success' ||
-          needs.build-macos-py39.result != 'success' ||
-          needs.build-ubuntu-py38.result != 'success' ||
-          needs.build-macos-py38.result != 'success'
+          needs.build-macos-py39.result != 'success'
         run: exit 1
