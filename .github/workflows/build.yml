@@ -169,22 +169,6 @@ jobs:
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ build-ubuntu-py39, read-exclusions ]
-  build-ubuntu-py38:
-    uses: ./.github/workflows/template.yml
-    with:
-      os: ubuntu-latest
-      python-version: '3.8'
-      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
-    secrets: inherit
-    needs: [ read-exclusions ]
-  build-macos-py38:
-    uses: ./.github/workflows/template.yml
-    with:
-      os: macos-13
-      python-version: '3.8'
-      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
-    secrets: inherit
-    needs: [ build-ubuntu-py38, read-exclusions ]
   build-ubuntu-py314:
     uses: ./.github/workflows/template.yml
     with:
