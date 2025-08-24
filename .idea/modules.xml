@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../wheel-axle/.idea/wheel-axle.iml" filepath="$PROJECT_DIR$/../wheel-axle/.idea/wheel-axle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/wheel-axle.iml" filepath="$PROJECT_DIR$/.idea/wheel-axle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../wheel-axle-example/.idea/wheel-axle-example.iml" filepath="$PROJECT_DIR$/../wheel-axle-example/.idea/wheel-axle-example.iml" />
       <module fileurl="file://$PROJECT_DIR$/../wheel-axle-runtime/.idea/wheel-axle-runtime.iml" filepath="$PROJECT_DIR$/../wheel-axle-runtime/.idea/wheel-axle-runtime.iml" />
     </modules>
   </component>

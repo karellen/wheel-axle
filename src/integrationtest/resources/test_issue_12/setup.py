@@ -19,7 +19,6 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
         'Topic :: Software Development :: Build Tools',
     ],
     keywords='',
@@ -28,7 +27,7 @@ setup(
     maintainer='Arcadiy Ivanov',
     maintainer_email='arcadiy@karellen.co',
 
-    license='Apache License, Version 2.0',
+    license='Apache-2.0',
 
     url='https://karellen.co',
     project_urls={
@@ -47,5 +46,5 @@ setup(
     dependency_links=[],
     zip_safe=False,
     obsoletes=[],
-    cmdclass={"bdist_axle": wheel_axle.bdist_axle.BdistAxle}
+    cmdclass={"bdist_wheel": wheel_axle.bdist_axle.BdistAxle}
 )

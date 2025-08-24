@@ -41,7 +41,7 @@ urls = {
     "Source Code": "https://github.com/karellen/wheel-axle/",
     "Documentation": "https://github.com/karellen/wheel-axle/"
 }
-license = "Apache License, Version 2.0"
+license = "Apache-2.0"
 
 requires_python = ">=3.9"
 
@@ -70,6 +70,7 @@ def set_properties(project):
         project.depends_on("wheel", ">=0.37.0")
     project.depends_on("wheel-axle-runtime", "<1.0,>0.0.5")
     project.build_depends_on("twine")
+    project.build_depends_on("build")
 
     project.set_property("coverage_break_build", False)
     project.set_property("cram_fail_if_no_tests", False)
@@ -94,14 +95,12 @@ def set_properties(project):
     })
 
     project.set_property("distutils_classifiers", [
-        "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX",
         "Operating System :: POSIX :: Linux",
