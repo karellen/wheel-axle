@@ -38,7 +38,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - shell: bash
         run: |
           echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
@@ -58,7 +58,7 @@ jobs:
     outputs:
       BUILD_EXCLUSIONS: ${{ steps.read-exclusions-step.outputs.BUILD_EXCLUSIONS }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: read-exclusions-step
         run: |
           set -xeEu

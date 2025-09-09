@@ -70,7 +70,7 @@ jobs:
       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - shell: bash
         run: |
           echo "PYB_EXTRA_ARGS=--no-venvs" >> $GITHUB_ENV
