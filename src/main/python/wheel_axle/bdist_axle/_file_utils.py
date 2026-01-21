@@ -30,6 +30,12 @@ def copy_link(src, dst, update=0, verbose=1, dry_run=0, reproduce_link=False):
     link_dest = os.readlink(src)
     link_dest_isdir = os.path.isdir(os.path.join(os.path.dirname(src), link_dest))
 
+    if reproduce_link:
+        if os.path.islink(dst):
+            if verbose >= 1:
+                log.info("link %s exists - unlinking", dst)
+            os.unlink(dst)
+
     if verbose >= 1:
         log.info("%s link %s (%s) -> %s",
                  "reproducing" if reproduce_link else "registering",

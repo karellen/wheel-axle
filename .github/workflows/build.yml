@@ -225,6 +225,8 @@ jobs:
     steps:
       - name: Check build matrix status
         if: |
+          needs.build-ubuntu-py314.result != 'success' ||
+          needs.build-macos-py314.result != 'success' ||
           needs.build-ubuntu-py313.result != 'success' ||
           needs.build-macos-py313.result != 'success' ||
           needs.build-ubuntu-py312.result != 'success' ||

@@ -88,6 +88,37 @@ class BuildAxleTest(unittest.TestCase):
 
         check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
 
+    def build_axle_with_build(self, dir_name, **extra_args):
+        src_dir = jp(self.test_dir, dir_name)
+        shutil.copytree(src_dir, self.src_dir, symlinks=True, ignore_dangling_symlinks=True)
+
+        old_sys_argv = list(sys.argv)
+        old_sys_path = list(sys.path)
+        old_cwd = os.getcwd()
+        paths_to_remove = []
+        for idx, sys_path_dir in enumerate(sys.path):
+            if os.path.exists(jp(sys_path_dir, "build.py")):
+                paths_to_remove.append(sys_path_dir)
+
+        for p in paths_to_remove:
+            sys.path.remove(p)
+
+        try:
+            sys.argv.clear()
+            sys.argv.extend(["build", "-n", "--wheel",
+                             "-C-v",
+                             "-C-k",
+                             f"-C--bdist-dir={self.build_dir}",
+                             f"-C--dist-dir={self.dist_dir}"] + list(extra_args))
+            os.chdir(self.src_dir)
+            runpy.run_module("build", run_name="__main__")
+        finally:
+            os.chdir(old_cwd)
+            sys.argv.clear()
+            sys.argv.extend(old_sys_argv)
+            sys.path.clear()
+            sys.path.extend(old_sys_path)
+
     def install(self, wheel_file, user=False, deps=[]):
         check_call([sys.executable, "-m", "pip", "install", "--pre"] +
                    (["--user", "--force-reinstall"] if user else []) +
@@ -101,7 +132,13 @@ class BuildAxleTest(unittest.TestCase):
 
     def test_axle_1(self):
         self.build_axle("test_axle_1")
+        self._test_axle_1()
 
+    def test_axle_1_build(self):
+        self.build_axle_with_build("test_axle_1")
+        self._test_axle_1()
+
+    def _test_axle_1(self):
         self.assertTrue(exists(jp(self.dist_dir, "test_axle_1-0.0.1-py3-none-any.whl")))
 
         with open(jp(self.build_dir, "test_axle_1-0.0.1.dist-info", "symlinks.txt")) as f:
