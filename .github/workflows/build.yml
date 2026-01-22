@@ -16,9 +16,9 @@ jobs:
         os:
           - ubuntu-latest
         python-version:
-          - '3.13'
+          - '3.14'
         pip-version:
-          - '25.1'
+          - '25.3'
         setuptools-version:
           - '80.9'
           - '79.0'
@@ -33,6 +33,7 @@ jobs:
           - '70.3'
           - '69.5'
         wheel-version:
+          - '0.46.2'
           - '0.45.1'
           - '0.42.0'
     env:
@@ -69,22 +70,53 @@ jobs:
             echo -e '\nEOF'
           }  >> "$GITHUB_OUTPUT"
 
-
+  build-ubuntu-py314:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.14'
+      deploy: ${{ github.event_name == 'push' }}
+      deploy-pip: '25.3'
+      deploy-setuptools: '80.9'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ read-exclusions ]
+  build-macos-intel-py314:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: macos-15-intel
+      python-version: '3.14'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ build-ubuntu-py314, read-exclusions ]
+  build-macos-arm-py314:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: macos-15
+      python-version: '3.14'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ build-ubuntu-py314, read-exclusions ]
   build-ubuntu-py313:
     uses: ./.github/workflows/template.yml
     with:
       os: ubuntu-latest
       python-version: '3.13'
-      deploy: ${{ github.event_name == 'push' }}
-      deploy-pip: '25.1'
-      deploy-setuptools: '80.9'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]
-  build-macos-py313:
+  build-macos-intel-py313:
     uses: ./.github/workflows/template.yml
     with:
-      os: macos-13
+      os: macos-15-intel
+      python-version: '3.13'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ build-ubuntu-py313, read-exclusions ]
+  build-macos-arm-py313:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: macos-15
       python-version: '3.13'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
@@ -116,7 +148,7 @@ jobs:
   build-macos-py312:
     uses: ./.github/workflows/template.yml
     with:
-      os: macos-13
+      os: macos-15-intel
       python-version: '3.12'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
@@ -132,7 +164,7 @@ jobs:
   build-macos-py311:
     uses: ./.github/workflows/template.yml
     with:
-      os: macos-13
+      os: macos-15-intel
       python-version: '3.11'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
@@ -148,7 +180,7 @@ jobs:
   build-macos-py310:
     uses: ./.github/workflows/template.yml
     with:
-      os: macos-13
+      os: macos-15-intel
       python-version: '3.10'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
@@ -164,27 +196,11 @@ jobs:
   build-macos-py39:
     uses: ./.github/workflows/template.yml
     with:
-      os: macos-13
+      os: macos-15-intel
       python-version: '3.9'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ build-ubuntu-py39, read-exclusions ]
-  build-ubuntu-py314:
-    uses: ./.github/workflows/template.yml
-    with:
-      os: ubuntu-latest
-      python-version: '3.14-dev'
-      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
-    secrets: inherit
-    needs: [ read-exclusions ]
-  build-macos-py314:
-    uses: ./.github/workflows/template.yml
-    with:
-      os: macos-13
-      python-version: '3.14-dev'
-      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
-    secrets: inherit
-    needs: [ build-ubuntu-py314, read-exclusions ]
 #  build-ubuntu-py314t:
 #    uses: ./.github/workflows/template.yml
 #    with:
@@ -209,11 +225,13 @@ jobs:
 #      - build-ubuntu-py314t
 #      - build-macos-py314t
       - build-ubuntu-py314
-      - build-macos-py314
+      - build-macos-intel-py314
+      - build-macos-arm-py314
 #      - build-ubuntu-py313t
 #      - build-macos-py313t
       - build-ubuntu-py313
-      - build-macos-py313
+      - build-macos-intel-py313
+      - build-macos-arm-py313
       - build-ubuntu-py312
       - build-macos-py312
       - build-ubuntu-py311
@@ -225,8 +243,12 @@ jobs:
     steps:
       - name: Check build matrix status
         if: |
+          needs.build-ubuntu-py314.result != 'success' ||
+          needs.build-macos-intel-py314.result != 'success' ||
+          needs.build-macos-arm-py314.result != 'success' ||
           needs.build-ubuntu-py313.result != 'success' ||
-          needs.build-macos-py313.result != 'success' ||
+          needs.build-macos-intel-py313.result != 'success' ||
+          needs.build-macos-arm-py313.result != 'success' ||
           needs.build-ubuntu-py312.result != 'success' ||
           needs.build-macos-py312.result != 'success' ||
           needs.build-ubuntu-py311.result != 'success' ||
