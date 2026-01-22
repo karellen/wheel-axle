@@ -38,7 +38,7 @@ jobs:
         python-version:
           - ${{ inputs.python-version }}
         pip-version:
-          - '25.1'
+          - '25.3'
           - '24.3'
           - '23.3'
           - '22.3'

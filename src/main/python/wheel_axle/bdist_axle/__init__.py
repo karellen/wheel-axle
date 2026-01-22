@@ -35,19 +35,17 @@ from setuptools.command.install_scripts import install_scripts
 
 try:
     # SetupTools >= 70.1
-    from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+    from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag, tags
 except ImportError as e:
     try:
         # Wheel >= 0.44.0
-        from wheel._bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+        from wheel._bdist_wheel import bdist_wheel as _bdist_wheel, python_tag, tags
     except ImportError:
         # Wheel < 0.44.0
         try:
-            from wheel.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag
+            from wheel.bdist_wheel import bdist_wheel as _bdist_wheel, python_tag, tags
         except ImportError:
             raise ImportError("Either `setuptools>=70.1` package or `wheel` package is required")
-
-from wheel.vendored.packaging import tags
 
 from wheel_axle.bdist_axle._file_utils import copy_link, copy_tree
 from wheel_axle.runtime._symlinks import write_symlinks_file
@@ -56,6 +54,7 @@ from wheel_axle.runtime.constants import AXLE_LOCK_FILE, SYMLINKS_FILE, REQUIRE_
 __version__ = "${dist_version}"
 WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0"
 WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY = f"{WHEEL_AXLE_DEPENDENCY},>0.0.5"
+
 
 class SymlinkAwareCommmand(Command):
     def initialize_options(self):
