@@ -68,7 +68,7 @@ class SymlinkAwareCommmand(Command):
         the latter defaults to false for commands that don't define it.)"""
 
         if os.path.islink(infile):
-            out = copy_link(infile, outfile, not self.force, dry_run=self.dry_run)
+            out = copy_link(infile, outfile, not self.force)
             self._symlinks.append(out)
             return out[0], 0
 
@@ -84,7 +84,7 @@ class SymlinkAwareCommmand(Command):
 
         output, symlinks = copy_tree(infile, outfile, preserve_mode,
                                      preserve_times, preserve_symlinks,
-                                     not self.force, dry_run=self.dry_run)
+                                     not self.force)
         self._symlinks.extend(symlinks)
         return output
 
@@ -186,7 +186,7 @@ class BuildPy(build_py):
         the latter defaults to false for commands that don't define it.)"""
 
         if os.path.islink(infile):
-            out = copy_link(infile, outfile, not self.force, dry_run=self.dry_run, reproduce_link=True)
+            out = copy_link(infile, outfile, not self.force, reproduce_link=True)
             return out[0], 1
 
         return super().copy_file(infile, outfile, preserve_mode=preserve_mode, preserve_times=preserve_times,

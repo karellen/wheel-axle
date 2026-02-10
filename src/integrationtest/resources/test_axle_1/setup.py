@@ -42,7 +42,6 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
         'Topic :: Software Development :: Build Tools',
     ],
     keywords='',

@@ -44,23 +44,19 @@ def copy_link(src, dst, update=0, verbose=1, dry_run=0, reproduce_link=False):
 
 
 def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
-              preserve_symlinks=0, update=0, verbose=1, dry_run=0):
+              preserve_symlinks=0, update=0, verbose=1):
     from distutils.file_util import copy_file
 
-    if not dry_run and not os.path.isdir(src):
+    if not os.path.isdir(src):
         raise DistutilsFileError(
             "cannot copy tree '%s': not a directory" % src)
     try:
         names = os.listdir(src)
     except OSError as e:
-        if dry_run:
-            names = []
-        else:
-            raise DistutilsFileError(
-                "error listing files in '%s': %s" % (src, e.strerror))
+        raise DistutilsFileError(
+            "error listing files in '%s': %s" % (src, e.strerror))
 
-    if not dry_run:
-        dir_util.mkpath(dst, verbose=verbose)
+    dir_util.mkpath(dst, verbose=verbose)
 
     outputs = []
     links = []
@@ -83,13 +79,12 @@ def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
         elif os.path.isdir(src_name):
             _outputs, _links = copy_tree(src_name, dst_name, preserve_mode,
                                          preserve_times, preserve_symlinks, update,
-                                         verbose=verbose, dry_run=dry_run)
+                                         verbose=verbose)
             outputs.extend(_outputs)
             links.extend(_links)
         else:
             copy_file(src_name, dst_name, preserve_mode,
-                      preserve_times, update, verbose=verbose,
-                      dry_run=dry_run)
+                      preserve_times, update, verbose=verbose)
             outputs.append(dst_name)
 
     return outputs, links
