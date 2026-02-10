@@ -78,8 +78,8 @@ jobs:
       os: ubuntu-latest
       python-version: '3.14'
       deploy: ${{ github.event_name == 'push' }}
-      deploy-pip: '25.3'
-      deploy-setuptools: '80.9'
+      deploy-pip: '26.0'
+      deploy-setuptools: '82.0'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]
