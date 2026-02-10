@@ -18,9 +18,11 @@ jobs:
         python-version:
           - '3.14'
         pip-version:
-          - '25.3'
+          - '26.0'
         setuptools-version:
-          - '80.9'
+          - '82.0'
+          - '81.0'
+          - '80.10'
           - '79.0'
           - '78.1'
           - '77.0'

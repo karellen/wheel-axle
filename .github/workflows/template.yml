@@ -38,12 +38,15 @@ jobs:
         python-version:
           - ${{ inputs.python-version }}
         pip-version:
+          - '26.0'
           - '25.3'
           - '24.3'
           - '23.3'
           - '22.3'
         setuptools-version:
-          - '80.9'
+          - '82.0'
+          - '81.0'
+          - '80.10'
           - '79.0'
           - '78.1'
           - '77.0'
