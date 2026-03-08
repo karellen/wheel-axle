@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - master
+permissions:
+  contents: write
 jobs:
   build-smoke-test:
     runs-on: ${{ matrix.os }}
