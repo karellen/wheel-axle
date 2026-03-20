@@ -25,6 +25,10 @@ on:
     secrets:
       PYPI_TOKEN:
         required: false
+      PYBUILDER_RELEASE_APP_ID:
+        required: false
+      PYBUILDER_RELEASE_APP_PRIVATE_KEY:
+        required: false
 
 jobs:
   build:
@@ -89,3 +93,5 @@ jobs:
             ${{ inputs.deploy
             && contains(env.DEPLOY_PIP, matrix.pip-version)
             && contains(env.DEPLOY_SETUPTOOLS, matrix.setuptools-version) }}
+          release-app-id: ${{ secrets.PYBUILDER_RELEASE_APP_ID }}
+          release-app-private-key: ${{ secrets.PYBUILDER_RELEASE_APP_PRIVATE_KEY }}
