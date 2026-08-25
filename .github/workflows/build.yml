@@ -23,27 +23,35 @@ jobs:
           - '26.2'
         setuptools-version:
           - '84.0'
-          - '83.0'
-          - '82.0'
-          - '81.0'
-          - '80.10'
-          - '79.0'
-          - '78.1'
-          - '77.0'
-          - '76.1'
-          - '75.9'
-          - '74.1'
-          - '73.0'
-          - '72.1'
-          - '71.1'
-          - '70.3'
-          - '69.5'
+          - '83.0.0'
+          - '82.0.0'
+          - '81.0.0'
+          - '80.10.0'
+          - '80.9.0'
+          - '80.8.0'
+          - '80.7.0'
+          - '80.6.0'
+          - '80.4.0'
+          - '80.3.0'
+          - '80.2.0'
+          - '80.1.0'
+          - '80.0.0'
+          - '79.0.0'
+          - '78.1.0'
+          - '78.0.0'
+          - '77.0.0'
+          - '76.1.0'
+          - '76.0.0'
+          - '75.9.0'
+          - '75.8.0'
+          - '75.7.0'
+          - '75.6.0'
+          - '75.5.0'
+          - '75.4.0'
         wheel-version:
           - '0.48.0'
           - '0.47.0'
-          - '0.46.2'
-          - '0.45.1'
-          - '0.42.0'
+          - '0.46.0'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -217,22 +225,6 @@ jobs:
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ build-ubuntu-py310, read-exclusions ]
-  build-ubuntu-py39:
-    uses: ./.github/workflows/template.yml
-    with:
-      os: ubuntu-latest
-      python-version: '3.9'
-      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
-    secrets: inherit
-    needs: [ read-exclusions ]
-  build-macos-py39:
-    uses: ./.github/workflows/template.yml
-    with:
-      os: macos-15-intel
-      python-version: '3.9'
-      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
-    secrets: inherit
-    needs: [ build-ubuntu-py39, read-exclusions ]
 #  build-ubuntu-py314t:
 #    uses: ./.github/workflows/template.yml
 #    with:
@@ -273,8 +265,6 @@ jobs:
       - build-macos-py311
       - build-ubuntu-py310
       - build-macos-py310
-      - build-ubuntu-py39
-      - build-macos-py39
     steps:
       - name: Check build matrix status
         if: |
@@ -292,7 +282,5 @@ jobs:
           needs.build-ubuntu-py311.result != 'success' ||
           needs.build-macos-py311.result != 'success' ||
           needs.build-ubuntu-py310.result != 'success' ||
-          needs.build-macos-py310.result != 'success' ||
-          needs.build-ubuntu-py39.result != 'success' ||
-          needs.build-macos-py39.result != 'success'
+          needs.build-macos-py310.result != 'success'
         run: exit 1
