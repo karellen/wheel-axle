@@ -98,5 +98,45 @@
   {
     "python-version": "3.14t",
     "pip-version": "22.3"
+  },
+  {
+    "python-version": "3.15-dev",
+    "setuptools-version": "65.7"
+  },
+  {
+    "python-version": "3.15-dev",
+    "setuptools-version": "64.0"
+  },
+  {
+    "python-version": "3.15-dev",
+    "setuptools-version": "63.4"
+  },
+  {
+    "python-version": "3.15-dev",
+    "setuptools-version": "62.6"
+  },
+  {
+    "python-version": "3.15-dev",
+    "pip-version": "22.3"
+  },
+  {
+    "python-version": "3.15t-dev",
+    "setuptools-version": "65.7"
+  },
+  {
+    "python-version": "3.15t-dev",
+    "setuptools-version": "64.0"
+  },
+  {
+    "python-version": "3.15t-dev",
+    "setuptools-version": "63.4"
+  },
+  {
+    "python-version": "3.15t-dev",
+    "setuptools-version": "62.6"
+  },
+  {
+    "python-version": "3.15t-dev",
+    "pip-version": "22.3"
   }
 ]

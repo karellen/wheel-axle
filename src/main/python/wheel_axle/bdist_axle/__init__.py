@@ -49,10 +49,12 @@ except ImportError as e:
 
 from wheel_axle.bdist_axle._file_utils import copy_link, copy_tree
 from wheel_axle.runtime._symlinks import write_symlinks_file
-from wheel_axle.runtime.constants import AXLE_LOCK_FILE, SYMLINKS_FILE, REQUIRE_LIBPYTHON_FILE
+from wheel_axle.runtime.constants import (AXLE_LOCK_FILE, SYMLINKS_FILE, REQUIRE_LIBPYTHON_FILE,
+                                          START_SUFFIX, START_ENTRY_POINT, START_PTH_LINE)
 
 __version__ = "${dist_version}"
-WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0"
+# The `.start` entry point is only available starting with Wheel Axle Runtime 0.0.12
+WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0,>=0.0.12"
 WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY = f"{WHEEL_AXLE_DEPENDENCY},>0.0.5"
 
 
@@ -330,7 +332,15 @@ class BdistAxle(_bdist_wheel):
     boolean_options = list(_bdist_wheel.boolean_options)
     boolean_options += ["root-is-pure", "require-libpython"]
 
-    AXLE_PTH_CONTENTS = """import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname);"""
+    # PEP 829 startup entry point file contents, honored starting with Python 3.15. Its
+    # presence also suppresses the `import` line of the `.pth` file of the same name.
+    AXLE_START_CONTENTS = START_ENTRY_POINT + "\n"
+
+    # The `import` line covering the Python versions predating PEP 829. It calls the very
+    # same entry point as the `.start` file above, which is what the `site` documentation
+    # prescribes for the transition. Deprecated by PEP 829 and ignored altogether
+    # starting with Python 3.18.
+    AXLE_PTH_CONTENTS = START_PTH_LINE
 
     def initialize_options(self):
         super().initialize_options()
@@ -414,6 +424,10 @@ class BdistAxle(_bdist_wheel):
         if self.require_libpython:
             with open(os.path.join(distinfo_path, REQUIRE_LIBPYTHON_FILE), "wb"):
                 pass
+
+        start_path = os.path.join(self.bdist_dir, self.wheel_dist_name + START_SUFFIX)
+        with open(start_path, "w", encoding="utf-8") as f:
+            f.write(self.AXLE_START_CONTENTS)
 
     def write_wheelfile(self, wheelfile_base, generator="bdist_axle (" + __version__ + ")"):
         return super().write_wheelfile(wheelfile_base, generator)

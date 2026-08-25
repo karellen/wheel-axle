@@ -20,8 +20,10 @@ jobs:
         python-version:
           - '3.14'
         pip-version:
-          - '26.0'
+          - '26.2'
         setuptools-version:
+          - '84.0'
+          - '83.0'
           - '82.0'
           - '81.0'
           - '80.10'
@@ -37,6 +39,8 @@ jobs:
           - '70.3'
           - '69.5'
         wheel-version:
+          - '0.48.0'
+          - '0.47.0'
           - '0.46.2'
           - '0.45.1'
           - '0.42.0'
@@ -74,14 +78,38 @@ jobs:
             echo -e '\nEOF'
           }  >> "$GITHUB_OUTPUT"
 
+  build-ubuntu-py315:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.15-dev'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ read-exclusions ]
+  build-macos-intel-py315:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: macos-15-intel
+      python-version: '3.15-dev'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ build-ubuntu-py315, read-exclusions ]
+  build-macos-arm-py315:
+    uses: ./.github/workflows/template.yml
+    with:
+      os: macos-15
+      python-version: '3.15-dev'
+      exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
+    secrets: inherit
+    needs: [ build-ubuntu-py315, read-exclusions ]
   build-ubuntu-py314:
     uses: ./.github/workflows/template.yml
     with:
       os: ubuntu-latest
       python-version: '3.14'
       deploy: ${{ github.event_name == 'push' }}
-      deploy-pip: '26.0'
-      deploy-setuptools: '82.0'
+      deploy-pip: '26.2'
+      deploy-setuptools: '84.0'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]
@@ -228,6 +256,9 @@ jobs:
     needs:
 #      - build-ubuntu-py314t
 #      - build-macos-py314t
+      - build-ubuntu-py315
+      - build-macos-intel-py315
+      - build-macos-arm-py315
       - build-ubuntu-py314
       - build-macos-intel-py314
       - build-macos-arm-py314
@@ -247,6 +278,9 @@ jobs:
     steps:
       - name: Check build matrix status
         if: |
+          needs.build-ubuntu-py315.result != 'success' ||
+          needs.build-macos-intel-py315.result != 'success' ||
+          needs.build-macos-arm-py315.result != 'success' ||
           needs.build-ubuntu-py314.result != 'success' ||
           needs.build-macos-intel-py314.result != 'success' ||
           needs.build-macos-arm-py314.result != 'success' ||

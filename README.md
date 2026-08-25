@@ -59,9 +59,17 @@ are NOT otherwise interpreted. THIS IS INTENTIONAL. Please
 see [Wheel Axle Runtime Security Notice](https://github.com/karellen/wheel-axle-runtime#security)
 for additional information.**
 
-A special `<distribution name and version>.pth` file is also added to the distribution. When the wheel is installed
-this `.pth` file triggers the post-install logic via
-[wheel-axle-runtime](https://github.com/karellen/wheel-axle-runtime).
+Two special startup files are also added to the distribution, and whichever one the running interpreter honors
+triggers the post-install logic via [wheel-axle-runtime](https://github.com/karellen/wheel-axle-runtime):
+
+* `<distribution name and version>.pth`, whose `import` line `site` executes up to Python 3.17
+* `<distribution name and version>.start`, a [PEP 829](https://peps.python.org/pep-0829/) startup entry point file
+  honored from Python 3.15 on, whose mere presence also suppresses the `import` line of the matching `.pth`
+
+**NOTE: wheels built by `bdist_axle` before 0.0.13 only carry the `.pth` file, and its `import` line relies on a
+`site` implementation detail that Python 3.15 removed. Those wheels fail to install their symlinks on Python 3.15 and
+have to be rebuilt with `bdist_axle` 0.0.13 or later. Please see the
+[Wheel Axle Runtime compatibility notes](https://github.com/karellen/wheel-axle-runtime#compatibility) for details.**
 
 ## Usage
 
