@@ -20,9 +20,9 @@ jobs:
         python-version:
           - '3.14'
         pip-version:
-          - '26.2'
+          - '26.2.0'
         setuptools-version:
-          - '84.0'
+          - '84.0.0'
           - '83.0.0'
           - '82.0.0'
           - '81.0.0'
@@ -116,8 +116,8 @@ jobs:
       os: ubuntu-latest
       python-version: '3.14'
       deploy: ${{ github.event_name == 'push' }}
-      deploy-pip: '26.2'
-      deploy-setuptools: '84.0'
+      deploy-pip: '26.2.0'
+      deploy-setuptools: '84.0.0'
       exclude: ${{ needs.read-exclusions.outputs.BUILD_EXCLUSIONS }}
     secrets: inherit
     needs: [ read-exclusions ]

@@ -42,14 +42,14 @@ jobs:
         python-version:
           - ${{ inputs.python-version }}
         pip-version:
-          - '26.2'
+          - '26.2.0'
           - '26.1.0'
           - '26.0.0'
           - '25.3.0'
           - '25.2.0'
           - '25.1.0'
         setuptools-version:
-          - '84.0'
+          - '84.0.0'
           - '83.0.0'
           - '82.0.0'
           - '81.0.0'
