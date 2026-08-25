@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "python-version": "3.15-dev",
+    "pip-version": "25.1.0"
+  },
+  {
+    "python-version": "3.15t-dev",
+    "pip-version": "25.1.0"
+  }
+]
