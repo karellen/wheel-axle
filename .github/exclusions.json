@@ -1,102 +1,10 @@
 [
   {
-    "python-version": "3.12",
-    "setuptools-version": "65.7"
+    "python-version": "3.15-dev",
+    "pip-version": "25.1.0"
   },
   {
-    "python-version": "3.12",
-    "setuptools-version": "64.0"
-  },
-  {
-    "python-version": "3.12",
-    "setuptools-version": "63.4"
-  },
-  {
-    "python-version": "3.12",
-    "setuptools-version": "62.6"
-  },
-  {
-    "python-version": "3.12",
-    "pip-version": "22.3"
-  },
-  {
-    "python-version": "3.13",
-    "setuptools-version": "65.7"
-  },
-  {
-    "python-version": "3.13",
-    "setuptools-version": "64.0"
-  },
-  {
-    "python-version": "3.13",
-    "setuptools-version": "63.4"
-  },
-  {
-    "python-version": "3.13",
-    "setuptools-version": "62.6"
-  },
-  {
-    "python-version": "3.13",
-    "pip-version": "22.3"
-  },
-  {
-    "python-version": "3.13t",
-    "setuptools-version": "65.7"
-  },
-  {
-    "python-version": "3.13t",
-    "setuptools-version": "64.0"
-  },
-  {
-    "python-version": "3.13t",
-    "setuptools-version": "63.4"
-  },
-  {
-    "python-version": "3.13t",
-    "setuptools-version": "62.6"
-  },
-  {
-    "python-version": "3.13t",
-    "pip-version": "22.3"
-  },
-  {
-    "python-version": "3.14",
-    "setuptools-version": "65.7"
-  },
-  {
-    "python-version": "3.14",
-    "setuptools-version": "64.0"
-  },
-  {
-    "python-version": "3.14",
-    "setuptools-version": "63.4"
-  },
-  {
-    "python-version": "3.14",
-    "setuptools-version": "62.6"
-  },
-  {
-    "python-version": "3.14",
-    "pip-version": "22.3"
-  },
-  {
-    "python-version": "3.14t",
-    "setuptools-version": "65.7"
-  },
-  {
-    "python-version": "3.14t",
-    "setuptools-version": "64.0"
-  },
-  {
-    "python-version": "3.14t",
-    "setuptools-version": "63.4"
-  },
-  {
-    "python-version": "3.14t",
-    "setuptools-version": "62.6"
-  },
-  {
-    "python-version": "3.14t",
-    "pip-version": "22.3"
+    "python-version": "3.15t-dev",
+    "pip-version": "25.1.0"
   }
 ]

@@ -24,6 +24,7 @@ import unittest
 from os.path import dirname, join as jp, exists
 from subprocess import check_call
 from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 try:
     # SetupTools >= 70.1
@@ -88,6 +89,20 @@ class BuildAxleTest(unittest.TestCase):
 
         check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
 
+    def check_startup_files(self, wheel_file, dist_name):
+        """Asserts the wheel carries both the `.pth` and the PEP 829 `.start` file."""
+        with ZipFile(wheel_file) as wheel:
+            names = wheel.namelist()
+            self.assertIn(dist_name + ".pth", names)
+            self.assertIn(dist_name + ".start", names)
+
+            pth = wheel.read(dist_name + ".pth").decode("utf-8")
+            start = wheel.read(dist_name + ".start").decode("utf-8")
+
+        # Both startup files have to call the very same entry point
+        self.assertEqual(start, "wheel_axle.runtime:start\n")
+        self.assertEqual(pth.strip(), "import wheel_axle.runtime; wheel_axle.runtime.start();")
+
     def install(self, wheel_file, user=False, deps=[]):
         check_call([sys.executable, "-m", "pip", "install", "--pre"] +
                    (["--user", "--force-reinstall"] if user else []) +
@@ -102,7 +117,9 @@ class BuildAxleTest(unittest.TestCase):
     def test_axle_1(self):
         self.build_axle("test_axle_1")
 
-        self.assertTrue(exists(jp(self.dist_dir, "test_axle_1-0.0.1-py3-none-any.whl")))
+        wheel_file = jp(self.dist_dir, "test_axle_1-0.0.1-py3-none-any.whl")
+        self.assertTrue(exists(wheel_file))
+        self.check_startup_files(wheel_file, "test_axle_1-0.0.1")
 
         with open(jp(self.build_dir, "test_axle_1-0.0.1.dist-info", "symlinks.txt")) as f:
             reader = csv.reader(f)
@@ -120,7 +137,9 @@ class BuildAxleTest(unittest.TestCase):
     def test_axle_2_with_libpython_req(self):
         self.build_axle("test_axle_2_libpython", "--require-libpython", "true")
 
-        self.assertTrue(exists(jp(self.dist_dir, "test_axle_2_libpython-0.0.1-py3-none-any.whl")))
+        wheel_file = jp(self.dist_dir, "test_axle_2_libpython-0.0.1-py3-none-any.whl")
+        self.assertTrue(exists(wheel_file))
+        self.check_startup_files(wheel_file, "test_axle_2_libpython-0.0.1")
 
         with open(jp(self.build_dir, "test_axle_2_libpython-0.0.1.dist-info", "symlinks.txt")) as f:
             reader = csv.reader(f)
@@ -139,7 +158,9 @@ class BuildAxleTest(unittest.TestCase):
     def test_issue_12(self):
         self.build_axle("test_issue_12")
 
-        self.assertTrue(exists(jp(self.dist_dir, "test_issue_12-0.0.1-py3-none-any.whl")))
+        wheel_file = jp(self.dist_dir, "test_issue_12-0.0.1-py3-none-any.whl")
+        self.assertTrue(exists(wheel_file))
+        self.check_startup_files(wheel_file, "test_issue_12-0.0.1")
 
         with open(jp(self.build_dir, "test_issue_12-0.0.1.dist-info", "symlinks.txt")) as f:
             reader = csv.reader(f)

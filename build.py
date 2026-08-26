@@ -43,7 +43,7 @@ urls = {
 }
 license = "Apache License, Version 2.0"
 
-requires_python = ">=3.9"
+requires_python = ">=3.10"
 
 default_task = ["analyze", "publish"]
 
@@ -68,7 +68,8 @@ def install_ci_dependencies(project):
 def set_properties(project):
     if "WHEEL_VER" not in environ:
         project.depends_on("wheel", ">=0.37.0")
-    project.depends_on("wheel-axle-runtime", "<1.0,>0.0.5")
+    # `bdist_axle` uses the `.start` file constants added in Wheel Axle Runtime 0.0.12
+    project.depends_on("wheel-axle-runtime", "<1.0,>=0.0.12")
     project.build_depends_on("twine")
 
     project.set_property("coverage_break_build", False)
@@ -95,12 +96,12 @@ def set_properties(project):
 
     project.set_property("distutils_classifiers", [
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX",
         "Operating System :: POSIX :: Linux",
