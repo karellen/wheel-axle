@@ -21,10 +21,14 @@ import runpy
 import shutil
 import sys
 import unittest
+from email.parser import Parser
 from os.path import dirname, join as jp, exists
 from subprocess import check_call
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
+
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
 
 try:
     # SetupTools >= 70.1
@@ -89,7 +93,7 @@ class BuildAxleTest(unittest.TestCase):
 
         check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
 
-    def check_startup_files(self, wheel_file, dist_name):
+    def check_startup_files(self, wheel_file, dist_name, require_libpython=False):
         """Asserts the wheel carries both the `.pth` and the PEP 829 `.start` file."""
         with ZipFile(wheel_file) as wheel:
             names = wheel.namelist()
@@ -98,10 +102,52 @@ class BuildAxleTest(unittest.TestCase):
 
             pth = wheel.read(dist_name + ".pth").decode("utf-8")
             start = wheel.read(dist_name + ".start").decode("utf-8")
+            metadata = wheel.read(dist_name + ".dist-info/METADATA").decode("utf-8")
 
-        # Both startup files have to call the very same entry point
         self.assertEqual(start, "wheel_axle.runtime:start\n")
-        self.assertEqual(pth.strip(), "import wheel_axle.runtime; wheel_axle.runtime.start();")
+
+        # The `.pth` file keeps calling the legacy entry point. It is only ever executed
+        # by the Pythons predating PEP 829, since 3.15 and later suppress the `import`
+        # line of a `.pth` file that has a `.start` file of the same name next to it, and
+        # `finalize` is the one entry point every published runtime provides.
+        self.assertEqual(pth.strip(), "import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname);")
+
+        self.check_runtime_dependency(metadata, require_libpython)
+
+    def check_runtime_dependency(self, metadata, require_libpython):
+        """Asserts the `.start` floor is scoped to the Pythons that actually run `.start`.
+
+        Wheel Axle Runtime 0.0.12 is the first release providing the `.start` entry point
+        and the first one requiring Python 3.10. Demanding it unconditionally makes every
+        wheel built here uninstallable on Python 3.9, so the floor has to be carried by an
+        environment marker that only Python 3.15+ satisfies. Below that the `.pth` file
+        drives the install and any published runtime will do.
+        """
+        requirements = [Requirement(value)
+                        for key, value in Parser().parsestr(metadata).items()
+                        if key == "Requires-Dist"]
+        runtime_reqs = [req for req in requirements
+                        if canonicalize_name(req.name) == "wheel-axle-runtime"]
+        self.assertTrue(runtime_reqs, "no wheel-axle-runtime requirement in %r" % requirements)
+
+        # `require_libpython` additionally rules out the runtimes predating that feature
+        legacy_allowed = {"0.0.11", "0.0.12", "0.0.13"} if require_libpython \
+            else {"0.0.5", "0.0.11", "0.0.12", "0.0.13"}
+        expectations = [("3.9", legacy_allowed),
+                        ("3.14", legacy_allowed),
+                        ("3.15", {"0.0.12", "0.0.13"})]
+
+        for python_version, allowed in expectations:
+            with self.subTest(python_version=python_version):
+                applicable = [req for req in runtime_reqs
+                              if not req.marker or req.marker.evaluate({"python_version": python_version})]
+                self.assertTrue(applicable, "nothing applies on Python %s" % python_version)
+
+                for candidate in ("0.0.5", "0.0.11", "0.0.12", "0.0.13", "1.0"):
+                    satisfied = all(candidate in req.specifier for req in applicable)
+                    self.assertEqual(satisfied, candidate in allowed,
+                                     "runtime %s on Python %s: expected %s, got %s" %
+                                     (candidate, python_version, candidate in allowed, satisfied))
 
     def install(self, wheel_file, user=False, deps=[]):
         check_call([sys.executable, "-m", "pip", "install", "--pre"] +
@@ -139,7 +185,7 @@ class BuildAxleTest(unittest.TestCase):
 
         wheel_file = jp(self.dist_dir, "test_axle_2_libpython-0.0.1-py3-none-any.whl")
         self.assertTrue(exists(wheel_file))
-        self.check_startup_files(wheel_file, "test_axle_2_libpython-0.0.1")
+        self.check_startup_files(wheel_file, "test_axle_2_libpython-0.0.1", require_libpython=True)
 
         with open(jp(self.build_dir, "test_axle_2_libpython-0.0.1.dist-info", "symlinks.txt")) as f:
             reader = csv.reader(f)

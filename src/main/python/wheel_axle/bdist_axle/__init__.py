@@ -50,12 +50,21 @@ except ImportError as e:
 from wheel_axle.bdist_axle._file_utils import copy_link, copy_tree
 from wheel_axle.runtime._symlinks import write_symlinks_file
 from wheel_axle.runtime.constants import (AXLE_LOCK_FILE, SYMLINKS_FILE, REQUIRE_LIBPYTHON_FILE,
-                                          START_SUFFIX, START_ENTRY_POINT, START_PTH_LINE)
+                                          START_SUFFIX, START_ENTRY_POINT)
 
 __version__ = "${dist_version}"
-# The `.start` entry point is only available starting with Wheel Axle Runtime 0.0.12
-WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0,>=0.0.12"
+WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0"
 WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY = f"{WHEEL_AXLE_DEPENDENCY},>0.0.5"
+
+# The `.start` entry point is only available starting with Wheel Axle Runtime 0.0.12,
+# which is also the first runtime to require Python 3.10. Only Python 3.15 and later ever
+# execute a `.start` file, so the floor is carried by a marker that nothing below 3.15
+# satisfies: demanding it unconditionally would make every wheel built here uninstallable
+# on Python 3.9, where no runtime new enough exists. Below 3.15 the `.pth` file drives the
+# install and every published runtime can do it.
+WHEEL_AXLE_START_DEPENDENCY = f"{WHEEL_AXLE_DEPENDENCY},>=0.0.12"
+LEGACY_PYTHON_MARKER = '; python_version < "3.15"'
+START_PYTHON_MARKER = '; python_version >= "3.15"'
 
 
 class SymlinkAwareCommmand(Command):
@@ -336,11 +345,12 @@ class BdistAxle(_bdist_wheel):
     # presence also suppresses the `import` line of the `.pth` file of the same name.
     AXLE_START_CONTENTS = START_ENTRY_POINT + "\n"
 
-    # The `import` line covering the Python versions predating PEP 829. It calls the very
-    # same entry point as the `.start` file above, which is what the `site` documentation
-    # prescribes for the transition. Deprecated by PEP 829 and ignored altogether
-    # starting with Python 3.18.
-    AXLE_PTH_CONTENTS = START_PTH_LINE
+    # The `import` line covering the Python versions predating PEP 829. It calls the
+    # legacy entry point rather than the one the `.start` file names, because it is only
+    # ever executed where that legacy entry point is the only one guaranteed to exist:
+    # Python 3.15 and later suppress this line in favor of the `.start` file above, and
+    # Python 3.18 ignores it altogether.
+    AXLE_PTH_CONTENTS = """import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname);"""
 
     def initialize_options(self):
         super().initialize_options()
@@ -365,9 +375,11 @@ class BdistAxle(_bdist_wheel):
             self.root_is_pure = bool(root_is_pure)
 
         if self.require_libpython:
-            self.distribution.install_requires.append(WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY)
+            self.distribution.install_requires.append(WHEEL_AXLE_REQUIRE_LIBPYTHON_DEPENDENCY +
+                                                      LEGACY_PYTHON_MARKER)
         else:
-            self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY)
+            self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY + LEGACY_PYTHON_MARKER)
+        self.distribution.install_requires.append(WHEEL_AXLE_START_DEPENDENCY + START_PYTHON_MARKER)
         self.distribution.extra_path = self.wheel_dist_name, self.AXLE_PTH_CONTENTS
 
     def get_tag(self):
