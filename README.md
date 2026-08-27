@@ -66,10 +66,32 @@ triggers the post-install logic via [wheel-axle-runtime](https://github.com/kare
 * `<distribution name and version>.start`, a [PEP 829](https://peps.python.org/pep-0829/) startup entry point file
   honored from Python 3.15 on, whose mere presence also suppresses the `import` line of the matching `.pth`
 
-**NOTE: wheels built by `bdist_axle` before 0.0.13 only carry the `.pth` file, and its `import` line relies on a
-`site` implementation detail that Python 3.15 removed. Those wheels fail to install their symlinks on Python 3.15 and
-have to be rebuilt with `bdist_axle` 0.0.13 or later. Please see the
+The two files deliberately call different entry points. The `.start` file names
+`wheel_axle.runtime:start`, which only exists in `wheel-axle-runtime` 0.0.12 and later, while the `.pth` file
+keeps calling `wheel_axle.runtime.finalize`, which every published runtime provides. Because Python 3.15 is
+the first version to honor a `.start` file, and also the first version supported by 0.0.12, the generated
+wheel scopes that floor with an environment marker:
+
+```
+Requires-Dist: wheel-axle-runtime<1.0; python_version < "3.15"
+Requires-Dist: wheel-axle-runtime<1.0,>=0.0.12; python_version >= "3.15"
+```
+
+This keeps a wheel installable on every interpreter it otherwise supports. A `py3-none-any` wheel built on a
+recent Python still installs on Python 3.9, where the marker leaves the requirement unbounded and the newest
+runtime compatible with that interpreter is selected, while Python 3.15 and later are guaranteed a runtime
+that can resolve the `.start` entry point even when an older one is already installed.
+
+**NOTE: wheels built by `bdist_axle` before 0.0.13 only carry the `.pth` file. Its `import` line reads the `fullname`
+local of `site`, which the initial PEP 829 implementation renamed, and which was restored before Python 3.15.0 was
+released. Those wheels therefore keep working on Python 3.15 proper; only the 3.15 pre-releases carrying the rename
+fail, and there the failure is a `NameError` traceback at every interpreter startup with the symlinks left uncreated.
+Rebuilding with `bdist_axle` 0.0.14 or later is still recommended, because PEP 829 stops executing `.pth` `import`
+lines altogether in Python 3.18 and only a `.start` file works from then on. Please see the
 [Wheel Axle Runtime compatibility notes](https://github.com/karellen/wheel-axle-runtime#compatibility) for details.**
+
+**NOTE: `bdist_axle` 0.0.13 requires `wheel-axle-runtime>=0.0.12` unconditionally, which makes the wheels it builds
+uninstallable on Python 3.9. Use 0.0.14 or later.**
 
 ## Usage
 
