@@ -30,6 +30,8 @@ from zipfile import ZipFile
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 
+from wheel_axle.runtime.constants import AXLE_LOCK_FILE, SYMLINKS_FILE
+
 try:
     # SetupTools >= 70.1
     from setuptools.command.bdist_wheel import get_abi_tag, get_platform, tags
@@ -92,6 +94,33 @@ class BuildAxleTest(unittest.TestCase):
             sys.argv.extend(old_sys_argv)
 
         check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
+
+    def build_pep517(self, dir_name):
+        """Builds the way `pip install <source tree>` does, through the PEP 517 hooks.
+
+        This is not the same code path as `setup.py bdist_axle`. The frontend asks for
+        the metadata first, which runs `dist_info` and therefore `egg2dist` on its own,
+        outside of `bdist_axle.run()`, and then hands the resulting `.dist-info` back to
+        the wheel build to be reused verbatim.
+        """
+        src_dir = jp(self.test_dir, dir_name)
+        shutil.copytree(src_dir, self.src_dir, symlinks=True, ignore_dangling_symlinks=True)
+
+        # The build runs out-of-process and without isolation, so `wheel_axle` has to be
+        # reachable from wherever this test itself imported it.
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join(path for path in sys.path if path)
+
+        check_call([sys.executable, "-m", "pip", "wheel",
+                    "--no-build-isolation", "--no-deps", "--no-index",
+                    "--wheel-dir", self.dist_dir, self.src_dir], env=env)
+
+        check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
+
+    def read_symlinks(self, wheel_file, dist_name):
+        with ZipFile(wheel_file) as wheel:
+            contents = wheel.read(f"{dist_name}.dist-info/{SYMLINKS_FILE}").decode("utf-8")
+        return {l[0]: (l[1], l[2]) for l in csv.reader(contents.splitlines())}
 
     def check_startup_files(self, wheel_file, dist_name, require_libpython=False):
         """Asserts the wheel carries both the `.pth` and the PEP 829 `.start` file."""
@@ -218,6 +247,31 @@ class BuildAxleTest(unittest.TestCase):
             "mypackage/lib/prefix/foo.so": ("foo.so.0", '0'),
             "mypackage/lib/prefix/foo.so.0": ("foo.so.0.1", '0'),
         })
+
+    def test_pep517(self):
+        """A wheel built through the PEP 517 hooks must be a complete Axle wheel.
+
+        The metadata the frontend prepares up front is produced before `bdist_axle` is
+        ever finalized and without an install tree to walk, so neither the runtime
+        requirements nor the symlink table can come from there.
+        """
+        self.build_pep517("test_pep517")
+
+        dist_name = "test_pep517-0.0.1"
+        wheel_file = jp(self.dist_dir, f"{dist_name}-py3-none-any.whl")
+        self.assertTrue(exists(wheel_file))
+        self.check_startup_files(wheel_file, dist_name)
+
+        with ZipFile(wheel_file) as wheel:
+            self.assertIn(f"{dist_name}.dist-info/{AXLE_LOCK_FILE}", wheel.namelist())
+
+        self.assertDictEqual(self.read_symlinks(wheel_file, dist_name), {
+            "pep517lib/libfoo.so": ("libfoo.so.0", '0'),
+            "pep517lib/libfoo.so.0": ("libfoo.so.0.1", '0'),
+            f"{dist_name}.data/scripts/script2": ("script1", '0'),
+        })
+
+        self.install(wheel_file)
 
     def get_platform(self):
         return get_platform(self.build_dir).lower().replace('-', '_').replace('.', '_')

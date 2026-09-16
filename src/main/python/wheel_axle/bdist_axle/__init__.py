@@ -359,6 +359,7 @@ class BdistAxle(_bdist_wheel):
         self.python_tag = None
         self.python_tag_supplied = False
         self.require_libpython = False
+        self.building_wheel = False
 
     def finalize_options(self):
         root_is_pure_supplied = self.root_is_pure is not None
@@ -381,6 +382,16 @@ class BdistAxle(_bdist_wheel):
             self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY + LEGACY_PYTHON_MARKER)
         self.distribution.install_requires.append(WHEEL_AXLE_START_DEPENDENCY + START_PYTHON_MARKER)
         self.distribution.extra_path = self.wheel_dist_name, self.AXLE_PTH_CONTENTS
+
+        # A PEP 517 frontend prepares the metadata first and then hands the resulting
+        # `.dist-info` back here, which `bdist_wheel` copies into the wheel verbatim
+        # instead of converting the egg-info it has just built. That directory cannot
+        # carry the symlink table, the lock file, the libpython marker or the `.start`
+        # file, because none of them exist until the install tree has been laid out, so
+        # reusing it strips the wheel of everything that makes it an axle wheel. Always
+        # convert afresh.
+        if getattr(self, "dist_info_dir", None):
+            self.dist_info_dir = None
 
     def get_tag(self):
         tag = super().get_tag()
@@ -414,13 +425,26 @@ class BdistAxle(_bdist_wheel):
             self.distribution.cmdclass.update(patch_classes)
 
             remove_patched_command_objs()
+            self.building_wheel = True
             try:
                 super().run()
             finally:
+                self.building_wheel = False
                 self.distribution.cmdclass = old_cmdclass
                 remove_patched_command_objs()
 
     def egg2dist(self, egginfo_path, distinfo_path):
+        if not self.building_wheel:
+            # The `dist_info` command, which is what `prepare_metadata_for_build_wheel`
+            # runs, converts the egg-info on its own without ever building the install
+            # tree, so there are no symlinks to record and nothing to lock. It also runs
+            # `egg_info` before this command is finalized, which means the metadata it
+            # has just written predates the runtime requirements added above.
+            # Regenerate it, or the prepared metadata will not match the wheel's.
+            self.get_finalized_command("egg_info").run()
+            super().egg2dist(egginfo_path, distinfo_path)
+            return
+
         super().egg2dist(egginfo_path, distinfo_path)
 
         install_cmd = self.get_finalized_command("install")

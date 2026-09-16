@@ -111,3 +111,43 @@ Additional functionality is available via the following options:
 
 Using `--python-tag`, `--root-is-pure` and `--abi-tag` allows you to create wheels that carry platform-dependent data
 while otherwise containing pure-Python libraries.
+
+### PEP 517 builds
+
+A PEP 517 frontend such as `pip` or `build` never invokes `bdist_axle` by name, so a project that must be installable
+straight from a source tree or an sdist has to install `BdistAxle` in place of `bdist_wheel` instead:
+
+```python
+from wheel_axle.bdist_axle import BdistAxle
+
+setup(
+    ...,
+    cmdclass={"bdist_wheel": BdistAxle}
+)
+```
+
+The command line options above are then supplied through `setup.cfg`, in a `[bdist_wheel]` section, since the frontend
+owns the command line:
+
+```ini
+[bdist_wheel]
+root_is_pure = false
+require_libpython = true
+```
+
+With that in place `pip install <source tree>`, `pip wheel <source tree>` and [build](https://pypi.org/project/build/)
+all produce a complete axle wheel:
+
+```commandline
+python -m build --wheel
+```
+
+**NOTE: build the wheel directly from the source tree, as above. `python -m build` with no arguments builds an sdist
+first and then builds the wheel from that sdist, and `setuptools`' `sdist` command resolves every symlink into a copy
+of its target. The wheel that comes out of the sdist therefore has an empty `symlinks.txt` and carries each symlink
+target duplicated once per link that pointed at it. This is a property of `sdist` itself, not of `bdist_axle`, and it
+applies equally to `pip install <sdist>` and to anything else installing from a source distribution. Symlinks only
+survive a build that reads the original working tree.**
+
+**NOTE: `bdist_axle` before 0.0.15 crashes in `prepare_metadata_for_build_wheel` when installed as `bdist_wheel`,
+making `pip install <source tree>` and `pip install <sdist>` fail outright for any project that does this.**
