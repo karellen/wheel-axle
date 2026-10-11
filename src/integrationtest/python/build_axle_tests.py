@@ -46,13 +46,7 @@ except ImportError:
 
 class BuildAxleTest(unittest.TestCase):
     def is_success(self):
-        if hasattr(self._outcome, 'errors'):
-            # Python 3.4 - 3.10  (These two methods have no side effects)
-            result = self.defaultTestResult()
-            self._feedErrorsToResult(result, self._outcome.errors)
-        else:
-            # Python 3.11+
-            result = self._outcome.result
+        result = self._outcome.result
         return all(test != self for test, text in result.errors + result.failures)
 
     def setUp(self) -> None:
