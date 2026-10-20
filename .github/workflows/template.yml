@@ -54,7 +54,7 @@ jobs:
         # 75.4.0 is not redundant: `bdist_wheel.egg2dist`, which `bdist_axle` overrides,
         # was rewritten in 75.6.0, and the floor is the only entry left below that.
         setuptools-version:
-          - '84.0.0'
+          - '84.2.0'
           - '83.0.0'
           - '82.0.0'
           - '81.0.0'
