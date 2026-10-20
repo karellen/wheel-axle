@@ -352,6 +352,20 @@ class BdistAxle(_bdist_wheel):
     # Python 3.18 ignores it altogether.
     AXLE_PTH_CONTENTS = """import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname);"""
 
+    # Setuptools 84.2 turned `abi_tag` into a read-only property of `bdist_wheel` that
+    # computes the interpreter's own ABI tag, while `--abi-tag` (and `abi_tag` in
+    # `setup.cfg`) still has to be able to assign it. Keep the override in `_abi_tag`,
+    # and let whatever the base class computes show through when there is none.
+    @property
+    def abi_tag(self):
+        if self._abi_tag is not None:
+            return self._abi_tag
+        return getattr(super(), "abi_tag", None)
+
+    @abi_tag.setter
+    def abi_tag(self, value):
+        self._abi_tag = value
+
     def initialize_options(self):
         super().initialize_options()
         self.abi_tag = None
@@ -364,7 +378,7 @@ class BdistAxle(_bdist_wheel):
     def finalize_options(self):
         root_is_pure_supplied = self.root_is_pure is not None
         root_is_pure = self.root_is_pure
-        self.abi_tag_supplied = self.abi_tag is not None
+        self.abi_tag_supplied = self._abi_tag is not None
 
         self.python_tag_supplied = self.python_tag is not None
         if not self.python_tag_supplied:
@@ -394,7 +408,14 @@ class BdistAxle(_bdist_wheel):
             self.dist_info_dir = None
 
     def get_tag(self):
-        tag = super().get_tag()
+        # Since 84.2 the base class reads `abi_tag` itself, and would reject an `abi3`
+        # override without `--py-limited-api`. The override is applied below, so the base
+        # class has to keep deriving its tag from the interpreter alone, as it always has.
+        abi_tag, self._abi_tag = self._abi_tag, None
+        try:
+            tag = super().get_tag()
+        finally:
+            self._abi_tag = abi_tag
 
         tag = (self.python_tag if self.python_tag_supplied else tag[0],
                self.abi_tag if self.abi_tag_supplied else tag[1],

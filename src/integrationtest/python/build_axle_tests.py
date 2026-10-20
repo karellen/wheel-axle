@@ -89,16 +89,22 @@ class BuildAxleTest(unittest.TestCase):
 
         check_call(["twine", "check", "--strict", f"{self.dist_dir}/*.whl"])
 
-    def build_pep517(self, dir_name):
+    def build_pep517(self, dir_name, setup_cfg=None):
         """Builds the way `pip install <source tree>` does, through the PEP 517 hooks.
 
         This is not the same code path as `setup.py bdist_axle`. The frontend asks for
         the metadata first, which runs `dist_info` and therefore `egg2dist` on its own,
         outside of `bdist_axle.run()`, and then hands the resulting `.dist-info` back to
         the wheel build to be reused verbatim.
+
+        A frontend cannot pass command options through, so `setup_cfg`, if given, is
+        written out as the project's `setup.cfg` to configure the build instead.
         """
         src_dir = jp(self.test_dir, dir_name)
         shutil.copytree(src_dir, self.src_dir, symlinks=True, ignore_dangling_symlinks=True)
+        if setup_cfg:
+            with open(jp(self.src_dir, "setup.cfg"), "wt") as f:
+                f.write(setup_cfg)
 
         # The build runs out-of-process and without isolation, so `wheel_axle` has to be
         # reachable from wherever this test itself imported it.
@@ -297,6 +303,40 @@ class BuildAxleTest(unittest.TestCase):
         wheel_name = f"test_axle_1-0.0.1-py3-none-{self.get_platform()}.whl"
         print(wheel_name)
         self.assertTrue(exists(jp(self.dist_dir, wheel_name)))
+
+    def test_axle_1_root_is_not_pure_abi3(self):
+        """An `abi3` override must not require `--py-limited-api`.
+
+        Setuptools 84.2 consults `abi_tag` itself and insists on `py_limited_api` once it
+        sees `abi3` there. The override is `bdist_axle`'s to apply, so the base class has
+        to keep deriving its tag from the interpreter, as it did before.
+        """
+        impl = tags.interpreter_name() + tags.interpreter_version()
+        self.build_axle("test_axle_1", "--root-is-pure", "false", "--abi-tag", "abi3", "--python-tag", impl)
+
+        print(*os.listdir(self.dist_dir))
+        wheel_name = f"test_axle_1-0.0.1-{impl}-abi3-{self.get_platform()}.whl"
+        print(wheel_name)
+        self.assertTrue(exists(jp(self.dist_dir, wheel_name)))
+
+    def test_pep517_setup_cfg_abi_none_python_tag(self):
+        """Tags overridden from `setup.cfg`, the only way to reach a PEP 517 build.
+
+        This is how `karellen-llvm` packages its platform-specific but Python-agnostic
+        wheels, and it broke when setuptools 84.2 made `bdist_wheel.abi_tag` read-only.
+        """
+        self.build_pep517("test_pep517", setup_cfg="\n".join(["[bdist_wheel]",
+                                                              "root_is_pure = false",
+                                                              "python_tag = py3",
+                                                              "abi_tag = none", ""]))
+
+        dist_name = "test_pep517-0.0.1"
+        print(*os.listdir(self.dist_dir))
+        wheel_file = jp(self.dist_dir, f"{dist_name}-py3-none-{self.get_platform()}.whl")
+        self.assertTrue(exists(wheel_file))
+
+        with ZipFile(wheel_file) as wheel:
+            self.assertIn(f"{dist_name}.dist-info/{AXLE_LOCK_FILE}", wheel.namelist())
 
 
 if __name__ == "__main__":
