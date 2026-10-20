@@ -50,7 +50,7 @@ except ImportError as e:
 from wheel_axle.bdist_axle._file_utils import copy_link, copy_tree
 from wheel_axle.runtime._symlinks import write_symlinks_file
 from wheel_axle.runtime.constants import (AXLE_LOCK_FILE, SYMLINKS_FILE, REQUIRE_LIBPYTHON_FILE,
-                                          START_SUFFIX, START_ENTRY_POINT)
+                                          DIST_INFO_SUFFIX, PTH_SUFFIX, START_SUFFIX, START_ENTRY_POINT)
 
 __version__ = "${dist_version}"
 WHEEL_AXLE_DEPENDENCY = "wheel-axle-runtime<1.0"
@@ -301,19 +301,6 @@ class Install(install):
     def initialize_options(self):
         super().initialize_options()
 
-    def finalize_options(self):
-        super().finalize_options()
-        self._restore_install_lib()
-
-    def _restore_install_lib(self):
-        """
-        Undo secondary effect of `extra_path` adding to `install_lib`
-        """
-        suffix = os.path.relpath(self.install_lib, self.install_libbase)
-
-        if suffix.strip() == BdistAxle.AXLE_PTH_CONTENTS.strip():
-            self.install_lib = self.install_libbase
-
     def run(self):
         super().run()
 
@@ -350,7 +337,29 @@ class BdistAxle(_bdist_wheel):
     # ever executed where that legacy entry point is the only one guaranteed to exist:
     # Python 3.15 and later suppress this line in favor of the `.start` file above, and
     # Python 3.18 ignores it altogether.
-    AXLE_PTH_CONTENTS = """import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname);"""
+    #
+    # Those versions run the `.pth` files of a site directory as soon as it is added. Where
+    # platlib is not purelib (`lib64` vs `lib`), the `.pth` of a non-pure wheel sits next to
+    # its `.dist-info` in `<prefix>/lib64/pythonX.Y/site-packages` and runs before
+    # `<prefix>/lib/pythonX.Y/site-packages`, where the runtime is, is on `sys.path`. What
+    # the runtime imports, such as `pip`, can be later still (`/usr/lib` vs `/usr/local/lib`
+    # on Fedora). Only if the `.pth` is in such a `<prefix>/<platlibdir>/...` directory,
+    # its `lib` counterpart is a different directory (a virtual environment symlinks one to
+    # the other) and not on `sys.path` yet, are all of the site directories appended for the
+    # duration of the finalization, and they are left behind only if the finalization fails.
+    # The trigger is derived from the path itself rather than `site.getsitepackages()`,
+    # which distributions patch. A `.pth` line has to be a single line of simple statements,
+    # hence the expressions.
+    AXLE_PTH_CONTENTS = ("import os, site, sys; _axle_site = os.path.dirname(fullname); "
+                         "_axle_dir = _axle_site.split(os.sep); "
+                         "_axle_lib = os.sep.join(_axle_dir[:-3] + ['lib'] + _axle_dir[-2:]); "
+                         "_axle_add = _axle_dir[-3:-2] == [getattr(sys, 'platlibdir', 'lib')] != ['lib'] "
+                         "and _axle_lib not in sys.path "
+                         "and os.path.realpath(_axle_lib) != os.path.realpath(_axle_site); "
+                         "_axle_len = len(sys.path); "
+                         "_axle_add and sys.path.extend(site.getsitepackages()); "
+                         "import wheel_axle.runtime; wheel_axle.runtime.finalize(fullname); "
+                         "_axle_add and sys.path.__delitem__(slice(_axle_len, None))")
 
     # Setuptools 84.2 turned `abi_tag` into a read-only property of `bdist_wheel` that
     # computes the interpreter's own ABI tag, while `--abi-tag` (and `abi_tag` in
@@ -395,13 +404,12 @@ class BdistAxle(_bdist_wheel):
         else:
             self.distribution.install_requires.append(WHEEL_AXLE_DEPENDENCY + LEGACY_PYTHON_MARKER)
         self.distribution.install_requires.append(WHEEL_AXLE_START_DEPENDENCY + START_PYTHON_MARKER)
-        self.distribution.extra_path = self.wheel_dist_name, self.AXLE_PTH_CONTENTS
 
         # A PEP 517 frontend prepares the metadata first and then hands the resulting
         # `.dist-info` back here, which `bdist_wheel` copies into the wheel verbatim
         # instead of converting the egg-info it has just built. That directory cannot
-        # carry the symlink table, the lock file, the libpython marker or the `.start`
-        # file, because none of them exist until the install tree has been laid out, so
+        # carry the symlink table, the lock file, the libpython marker or the startup
+        # files, because none of them exist until the install tree has been laid out, so
         # reusing it strips the wheel of everything that makes it an axle wheel. Always
         # convert afresh.
         if getattr(self, "dist_info_dir", None):
@@ -482,8 +490,14 @@ class BdistAxle(_bdist_wheel):
             with open(os.path.join(distinfo_path, REQUIRE_LIBPYTHON_FILE), "wb"):
                 pass
 
-        start_path = os.path.join(self.bdist_dir, self.wheel_dist_name + START_SUFFIX)
-        with open(start_path, "w", encoding="utf-8") as f:
+        # The runtime finds the `.dist-info` by stripping the suffix off the startup file
+        # being processed, so both have to sit next to it and be named after it. Neither
+        # holds for the wheel name, which carries the build tag, nor for the library
+        # directory, which is `.data/purelib` of a wheel whose root is platlib.
+        dist_path = distinfo_path[:-len(DIST_INFO_SUFFIX)]
+        with open(dist_path + PTH_SUFFIX, "w", encoding="utf-8") as f:
+            f.write(self.AXLE_PTH_CONTENTS + "\n")
+        with open(dist_path + START_SUFFIX, "w", encoding="utf-8") as f:
             f.write(self.AXLE_START_CONTENTS)
 
     def write_wheelfile(self, wheelfile_base, generator="bdist_axle (" + __version__ + ")"):
