@@ -66,6 +66,19 @@ triggers the post-install logic via [wheel-axle-runtime](https://github.com/kare
 * `<distribution name and version>.start`, a [PEP 829](https://peps.python.org/pep-0829/) startup entry point file
   honored from Python 3.15 on, whose mere presence also suppresses the `import` line of the matching `.pth`
 
+Both are placed in the root of the wheel next to the `.dist-info` and are named after it, because that is how the
+runtime finds the `.dist-info` they belong to. They are therefore always installed into the same directory as the
+`.dist-info`, purelib for a pure wheel and platlib for a non-pure one, and a `--build-number` build tag never becomes
+part of their names.
+
+Where platlib and purelib are different directories, such as `lib64` and `lib` on Fedora and RHEL, Python versions
+before 3.15 run the `.pth` of a non-pure wheel in `lib64` before `lib`, where the pure `wheel-axle-runtime` is
+installed, is on `sys.path`, let alone `/usr/lib`, where the `pip` it uses typically comes from when the wheel itself is
+in `/usr/local`. The `import` line detects exactly that case and makes all of the site directories importable for the
+duration of the post-install logic, leaving them behind only if it fails. Everywhere else it leaves `sys.path` alone.
+Python 3.15 and later never execute it, the `.start` file taking over, and need no such help, since they add every site
+directory before running any startup code.
+
 The two files deliberately call different entry points. The `.start` file names
 `wheel_axle.runtime:start`, which only exists in `wheel-axle-runtime` 0.0.12 and later, while the `.pth` file
 keeps calling `wheel_axle.runtime.finalize`, which every published runtime provides. Because Python 3.15 is
